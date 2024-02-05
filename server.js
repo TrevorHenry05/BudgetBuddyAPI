@@ -10,7 +10,7 @@ app.use('/users', userAuthRoutes);
 
 async function startServer() {
   try {
-    await mongoose.connect('mongodb://localhost:27017/budgetbuddy', { useNewUrlParser: true, useUnifiedTopology: true });
+    await mongoose.connect('mongodb://localhost:27017/budgetbuddy');
     console.log('Connected to MongoDB');
     app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`));
   } catch (error) {
