@@ -1,7 +1,7 @@
 const express = require('express');
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
-const { hashPassword } = require('../utils/hashpassword');
+const { hashPassword } = require('../utils/hashPassword');
 
 const router = express.Router();
 
