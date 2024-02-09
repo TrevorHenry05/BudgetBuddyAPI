@@ -6,7 +6,7 @@ const { hashPassword } = require("../utils/hashPassword");
 const router = express.Router();
 
 router.post("/register", async (req, res) => {
-  const { username, email, password, isAdmin } = req.body;
+  const { username, email, password } = req.body;
   const hashedPassword = await hashPassword(password);
 
   if (hashedPassword) {
@@ -14,7 +14,7 @@ router.post("/register", async (req, res) => {
       email: email,
       username: username,
       passwordHash: hashedPassword,
-      isAdmin: isAdmin,
+      isAdmin: false,
     });
 
     try {
