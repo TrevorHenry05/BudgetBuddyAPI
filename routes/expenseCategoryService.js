@@ -11,3 +11,5 @@ router.get("", async (req, res) => {
     res.status(500).send(error.toString());
   }
 });
+
+module.exports = router;
