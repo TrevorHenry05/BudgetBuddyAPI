@@ -1,6 +1,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const userAuthRoutes = require("./routes/userAuth");
+const budgetManagementRoutes = require("./routes/budgetManagement");
+const expenseCategoryServiceRoutes = require("./routes/expenseCategoryService");
 require("dotenv").config();
 
 const app = express();
@@ -8,6 +10,8 @@ const port = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use("/users", userAuthRoutes);
+app.use("/budgets", budgetManagementRoutes);
+app.use("/expensecategories", expenseCategoryServiceRoutes);
 
 async function startServer() {
   try {
