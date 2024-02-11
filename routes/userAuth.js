@@ -36,15 +36,14 @@ router.post("/register", async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
-  const { username, password } = req.body;
-  const user = await User.findOne({ username: username });
+  const { email, password } = req.body;
+  const user = await User.findOne({ email: email });
 
   if (user && (await bcrypt.compare(password, user.passwordHash))) {
     // Generate JWT token
     const token = jwt.sign(
       { userId: user._id, isAdmin: user.isAdmin },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      process.env.JWT_SECRET
     );
 
     res.status(200).json({ token: token, message: "Login successful" });
