@@ -60,38 +60,31 @@ router.get("/:groupId", async (req, res) => {
   }
 });
 
-router.post("/:groupId/members", async (req, res) => {
+router.put("/:groupId", async (req, res) => {
   const { groupId } = req.params;
-  const { userId } = req.body;
+  const { groupName, members } = req.body;
 
-  try {
-    const group = await Group.findById(groupId);
-
-    if (group) {
-      group.members.push(userId);
-      await group.save();
-      res.status(200).send("Member added successfully");
-    } else {
-      res.status(404).send("Group not found");
-    }
-  } catch (error) {
-    res.status(500).send(error.toString());
+  if (!groupName || !members) {
+    return res.status(400).json({
+      message: "groupName and members are required.",
+    });
   }
-});
 
-router.delete("/:groupId/members/:userId", async (req, res) => {
-  const { groupId, userId } = req.params;
+  const updateObj = {
+    groupName,
+    members,
+  };
 
   try {
-    const group = await Group.findById(groupId);
-
-    if (group) {
-      group.members = group.members.filter((member) => member != userId);
-      await group.save();
-      res.status(200).send("Member removed successfully");
-    } else {
-      res.status(404).send("Group not found");
-    }
+    const updatedGroup = await Group.findByIdAndUpdate(
+      groupId,
+      { $set: updateObj },
+      { new: true }
+    );
+    res.status(200).json({
+      message: "Group updated successfully",
+      data: updatedGroup,
+    });
   } catch (error) {
     res.status(500).send(error.toString());
   }

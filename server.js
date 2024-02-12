@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const userAuthRoutes = require("./routes/userAuth");
 const budgetManagementRoutes = require("./routes/budgetManagement");
 const expenseCategoryServiceRoutes = require("./routes/expenseCategoryService");
+const groupCollaborationServiceRoutes = require("./routes/groupCollaborationService");
 require("dotenv").config();
 
 const app = express();
@@ -12,6 +13,7 @@ app.use(express.json());
 app.use("/users", userAuthRoutes);
 app.use("/budgets", budgetManagementRoutes);
 app.use("/expensecategories", expenseCategoryServiceRoutes);
+app.use("/groups", groupCollaborationServiceRoutes);
 
 async function startServer() {
   try {

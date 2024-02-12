@@ -84,4 +84,43 @@ router.get("/all", async (req, res) => {
   }
 });
 
+router.put("", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1]; // Bearer <token>
+  const { username, email, password } = req.body;
+
+  if (!username || !email || !password) {
+    return res
+      .status(400)
+      .send("Username, email, and password are all required.");
+  }
+
+  if (!token) {
+    return res.status(401).send("Access Denied / Unauthorized request");
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const hashedPassword = await hashPassword(password);
+
+    const update = {
+      username: username,
+      email: email,
+      passwordHash: hashedPassword,
+    };
+
+    const updatedUser = await User.findByIdAndUpdate(decoded.userId, update, {
+      new: true,
+    });
+
+    if (!updatedUser) {
+      return res.status(404).send("User not found");
+    }
+
+    res.status(200).send("User updated successfully");
+  } catch (error) {
+    res.status(500).send(error.toString());
+  }
+});
+
 module.exports = router;

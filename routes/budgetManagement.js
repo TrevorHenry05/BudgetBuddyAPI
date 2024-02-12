@@ -109,7 +109,9 @@ router.put("/:budgetId", async (req, res) => {
   const budgetId = req.params.budgetId;
 
   try {
-    const updatedBudget = Budget.findByIdAndUpdate(budgetId, req.body);
+    const updatedBudget = Budget.findByIdAndUpdate(budgetId, req.body, {
+      new: true,
+    });
     res.status(200).json({
       message: "Budget updated successfully",
       data: updatedBudget,
