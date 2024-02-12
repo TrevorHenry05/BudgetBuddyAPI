@@ -75,4 +75,13 @@ router.get("", async (req, res) => {
   }
 });
 
+router.get("/all", async (req, res) => {
+  try {
+    const users = await User.find({}).select("-passwordHash");
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).send(error.toString());
+  }
+});
+
 module.exports = router;
