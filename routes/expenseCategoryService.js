@@ -3,7 +3,8 @@ const ExpenseCategory = require("../models/expenseCategory");
 
 const router = express.Router();
 
-router.get("", async (req, res) => {
+// Get all expense categories
+router.get("/", async (req, res) => {
   try {
     const expenseCategories = await ExpenseCategory.find({}).toArray();
     res.status(200).json(expenseCategories);
