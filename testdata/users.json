@@ -1,0 +1,70 @@
+[
+    {
+      "email": "user1@example.com",
+      "username": "testuser1",
+      "password": "password123",
+      "isAdmin": false
+    },
+    {
+      "email": "user2@example.com",
+      "username": "testuser2",
+      "password": "password123",
+      "isAdmin": false
+    },
+    {
+      "email": "user3@example.com",
+      "username": "testuser3",
+      "password": "password123",
+      "isAdmin": false
+    },
+    {
+      "email": "admin@example.com",
+      "username": "adminuser",
+      "password": "password123",
+      "isAdmin": true
+    },
+    {
+      "email": "user5@example.com",
+      "username": "testuser5",
+      "password": "password123",
+      "isAdmin": false
+    },
+    {
+      "email": "user6@example.com",
+      "username": "testuser6",
+      "password": "password123",
+      "isAdmin": false
+    },
+    {
+      "email": "user7@example.com",
+      "username": "testuser7",
+      "password": "password123",
+      "isAdmin": false
+    },
+    {
+      "email": "user8@example.com",
+      "username": "testuser8",
+      "password": "password123",
+      "isAdmin": false
+    },
+    {
+      "email": "user9@example.com",
+      "username": "testuser9",
+      "password": "password123",
+      "isAdmin": false
+    },
+    {
+      "email": "user10@example.com",
+      "username": "testuser10",
+      "password": "password123",
+      "isAdmin": false
+    },
+    {
+      "email": "user11@example.com",
+      "username": "testuser11",
+      "password": "password123",
+      "isAdmin": false
+    }
+]
+  
+  
