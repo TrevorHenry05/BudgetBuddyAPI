@@ -1,117 +1,77 @@
 const express = require("express");
-const jwt = require("jsonwebtoken");
 const Budget = require("../models/budget");
 
 const router = express.Router();
 
-router.post("", async (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1]; // Bearer <token>
+// Create a new budget
+router.post("/", async (req, res) => {
+  const newBudget = new Budget({
+    totalBudget: req.body.totalBudget,
+    purpose: req.body.purpose,
+    startDate: req.body.startDate,
+    endDate: req.body.endDate,
+    userId: req.user._id,
+    groupId: req.body.groupId || null,
+    budgetType: req.body.budgetType,
+    expenses: [],
+  });
 
   try {
-    if (token) {
-      const verified = jwt.verify(token, process.env.JWT_SECRET);
-      if (!verified) {
-        return res.status(401).send("Access Denied / Unauthorized request");
-      }
-
-      const newBudget = new Budget({
-        totalBudget: req.body.totalBudget,
-        purpose: req.body.purpose,
-        startDate: req.body.startDate,
-        endDate: req.body.endDate,
-        userId: verified.userId,
-        groupId: null,
-        budgetType: req.body.budgetType,
-        expenses: [],
-      });
-
-      await newBudget.save();
-      res.status(201).json({
-        message: "Budget created successfully",
-        data: newBudget,
-      });
-    } else {
-      const newBudget = new Budget({
-        totalBudget: req.body.totalBudget,
-        purpose: req.body.purpose,
-        startDate: req.body.startDate,
-        endDate: req.body.endDate,
-        userId: null,
-        groupId: req.body.groupId,
-        budgetType: req.body.budgetType,
-        expenses: [],
-      });
-
-      await newBudget.save();
-      res.status(201).json({
-        message: "Budget created successfully",
-        data: newBudget,
-      });
-    }
-  } catch (error) {
-    res.status(500).send(error.toString());
-  }
-});
-
-router.get("", async (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1]; // Bearer <token>
-
-  if (!token) {
-    return res.status(401).send("Access Denied / Unauthorized request");
-  }
-
-  try {
-    const verified = jwt.verify(token, process.env.JWT_SECRET);
-    if (!verified) {
-      return res.status(401).send("Access Denied / Unauthorized request");
-    }
-
-    Budget.find({ userId: verified.userId }).toArray((error, result) => {
-      if (error) {
-        res.status(500).send(error.toString());
-      } else {
-        res.status(200).json(result);
-      }
+    await newBudget.save();
+    res.status(201).json({
+      message: "Budget created successfully",
+      data: newBudget,
     });
   } catch (error) {
     res.status(500).send(error.toString());
   }
 });
 
-router.get("/:groupId", async (req, res) => {
-  const groupId = req.params.groupId;
-
+// Get budgets by userId
+router.get("/user", async (req, res) => {
   try {
-    Budget.find({ groupId: groupId }).toArray((error, result) => {
-      if (error) {
-        res.status(500).send(error.toString());
-      } else {
-        res.status(200).json(result);
-      }
-    });
+    const budgets = await Budget.find({ userId: req.user._id });
+    res.status(200).json(budgets);
   } catch (error) {
     res.status(500).send(error.toString());
   }
 });
 
+// Get budgets by groupId
+router.get("/group/:groupId", async (req, res) => {
+  const { groupId } = req.params;
+  try {
+    const budgets = await Budget.find({ groupId: groupId });
+    res.status(200).json(budgets);
+  } catch (error) {
+    res.status(500).send(error.toString());
+  }
+});
+
+// Get a specific budget by budgetId
 router.get("/:budgetId", async (req, res) => {
-  const budgetId = req.params.budgetId;
-
+  const { budgetId } = req.params;
   try {
-    const budget = Budget.findById(budgetId);
+    const budget = await Budget.findById(budgetId);
+    if (!budget) {
+      return res.status(404).send("Budget not found");
+    }
     res.status(200).json(budget);
   } catch (error) {
     res.status(500).send(error.toString());
   }
 });
 
+// Update a specific budget by budgetId
 router.put("/:budgetId", async (req, res) => {
-  const budgetId = req.params.budgetId;
-
+  const { budgetId } = req.params;
   try {
-    const updatedBudget = Budget.findByIdAndUpdate(budgetId, req.body, {
+    const updatedBudget = await Budget.findByIdAndUpdate(budgetId, req.body, {
       new: true,
     });
+    if (!updatedBudget) {
+      return res.status(404).send("Budget not found");
+    }
     res.status(200).json({
       message: "Budget updated successfully",
       data: updatedBudget,
@@ -121,12 +81,25 @@ router.put("/:budgetId", async (req, res) => {
   }
 });
 
+// Delete a specific budget by budgetId
 router.delete("/:budgetId", async (req, res) => {
-  const budgetId = req.params.budgetId;
-
+  const { budgetId } = req.params;
   try {
-    Budget.findByIdAndDelete(budgetId);
+    const deletedBudget = await Budget.findByIdAndDelete(budgetId);
+    if (!deletedBudget) {
+      return res.status(404).send("Budget not found");
+    }
     res.status(200).send("Budget deleted successfully");
+  } catch (error) {
+    res.status(500).send(error.toString());
+  }
+});
+
+// Get all budgets
+router.get("/", async (req, res) => {
+  try {
+    const budgets = await Budget.find({});
+    res.status(200).json(budgets);
   } catch (error) {
     res.status(500).send(error.toString());
   }
