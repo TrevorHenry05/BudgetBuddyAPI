@@ -6,7 +6,6 @@ const router = express.Router();
 
 router.get("/:groupId", async (req, res) => {
   const groupId = req.params.groupId;
-  const groupId = req.params.groupId;
 
   try {
     Expenses.find({ groupId: groupId }).toArray((error, result) => {
