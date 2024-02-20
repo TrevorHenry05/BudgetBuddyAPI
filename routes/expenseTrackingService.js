@@ -16,7 +16,7 @@ router.get("/:groupId", async (req, res, next) => {
 
 router.get("", async (req, res, next) => {
   try {
-    const expenses = await Expense.find({ members: req.user._id });
+    const expenses = await Expense.find({ userId: req.user._id });
     res.status(200).json(expenses);
   } catch (error) {
     next(error);
