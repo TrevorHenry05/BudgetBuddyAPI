@@ -5,7 +5,7 @@ const User = require("../models/user");
 const router = express.Router();
 
 // Register User
-router.post("/register", async (req, res) => {
+router.post("/register", async (req, res, next) => {
   const { username, email, password } = req.body;
   try {
     let user = await User.findOne({ email });
@@ -29,12 +29,12 @@ router.post("/register", async (req, res) => {
 
     res.status(201).json({ token: token, isAdmin: user.isAdmin });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 });
 
 // Login User
-router.post("/login", async (req, res) => {
+router.post("/login", async (req, res, next) => {
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ email });
@@ -55,7 +55,7 @@ router.post("/login", async (req, res) => {
 
     res.status(200).json({ token: token, isAdmin: user.isAdmin });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 });
 

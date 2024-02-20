@@ -4,17 +4,17 @@ const Group = require("../models/group");
 const router = express.Router();
 
 // GET all groups a user is a member of
-router.get("/user", async (req, res) => {
+router.get("/user", async (req, res, next) => {
   try {
     const groups = await Group.find({ members: req.user._id });
     res.status(200).json(groups);
   } catch (error) {
-    res.status(500).send(error.toString());
+    next(error);
   }
 });
 
 // POST a new group
-router.post("/", async (req, res) => {
+router.post("/", async (req, res, next) => {
   const { groupName } = req.body;
   if (!groupName) {
     return res.status(400).send("Group name is required.");
@@ -22,8 +22,8 @@ router.post("/", async (req, res) => {
 
   try {
     const newGroup = new Group({
-      groupName: groupName,
-      members: [req.user._id], // Automatically add the creator as a member
+      groupName,
+      members: [req.user._id],
       budgets: [],
     });
 
@@ -32,27 +32,27 @@ router.post("/", async (req, res) => {
       .status(201)
       .json({ message: "Group created successfully", data: newGroup });
   } catch (error) {
-    res.status(500).send(error.toString());
+    next(error);
   }
 });
 
 // GET a single group by its ID
-router.get("/:groupId", async (req, res) => {
+router.get("/:groupId", async (req, res, next) => {
   const { groupId } = req.params;
 
   try {
     const group = await Group.findById(groupId);
     if (!group) {
-      return res.status(404).send("Group not found");
+      return res.status(404).json({ message: "Group not found" });
     }
     res.status(200).json(group);
   } catch (error) {
-    res.status(500).send(error.toString());
+    next(error);
   }
 });
 
 // PUT (update) a group by its ID
-router.put("/:groupId", async (req, res) => {
+router.put("/:groupId", async (req, res, next) => {
   const { groupId } = req.params;
   const { groupName, members } = req.body;
 
@@ -69,24 +69,24 @@ router.put("/:groupId", async (req, res) => {
       { new: true }
     );
     if (!updatedGroup) {
-      return res.status(404).send("Group not found");
+      return res.status(404).send({ message: "Group not found" });
     }
     res.status(200).json({
       message: "Group updated successfully",
       data: updatedGroup,
     });
   } catch (error) {
-    res.status(500).send(error.toString());
+    next(error);
   }
 });
 
 // POST a new member to a group
-router.post("/:groupId/members", async (req, res) => {
+router.post("/:groupId/members", async (req, res, next) => {
   const { groupId } = req.params;
   const { memberId } = req.body;
 
   if (!memberId) {
-    return res.status(400).send("Member ID is required.");
+    return res.status(400).send({ message: "Member ID is required." });
   }
 
   try {
@@ -97,7 +97,7 @@ router.post("/:groupId/members", async (req, res) => {
     );
 
     if (!updatedGroup) {
-      return res.status(404).send("Group not found");
+      return res.status(404).send({ message: "Group not found" });
     }
 
     res.status(200).json({
@@ -105,12 +105,12 @@ router.post("/:groupId/members", async (req, res) => {
       data: updatedGroup,
     });
   } catch (error) {
-    res.status(500).send(error.toString());
+    next(error);
   }
 });
 
 // DELETE a member from a group
-router.delete("/:groupId/members/:memberId", async (req, res) => {
+router.delete("/:groupId/members/:memberId", async (req, res, next) => {
   const { groupId, memberId } = req.params;
 
   try {
@@ -121,7 +121,7 @@ router.delete("/:groupId/members/:memberId", async (req, res) => {
     );
 
     if (!updatedGroup) {
-      return res.status(404).send("Group not found");
+      return res.status(404).send({ message: "Group not found" });
     }
 
     res.status(200).json({
@@ -129,17 +129,38 @@ router.delete("/:groupId/members/:memberId", async (req, res) => {
       data: updatedGroup,
     });
   } catch (error) {
-    res.status(500).send(error.toString());
+    next(error);
+  }
+});
+
+// Delete a group by its ID
+router.delete("/:groupId", async (req, res, next) => {
+  const { groupId } = req.params;
+
+  try {
+    const group = await Group.findById(groupId);
+    if (!group) {
+      return res.status(404).json({ message: "Group not found" });
+    }
+
+    if (!group.members.includes(req.user._id)) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    await Group.findByIdAndDelete(groupId);
+    res.status(200).json({ message: "Group deleted successfully" });
+  } catch (error) {
+    next(error);
   }
 });
 
 // GET all groups (regardless of membership)
-router.get("/", async (req, res) => {
+router.get("/", async (req, res, next) => {
   try {
     const groups = await Group.find({});
     res.status(200).json(groups);
   } catch (error) {
-    res.status(500).send(error.toString());
+    next(error);
   }
 });
 

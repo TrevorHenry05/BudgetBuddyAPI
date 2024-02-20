@@ -2,14 +2,14 @@ const mongoose = require("mongoose");
 
 const ExpenseSchema = new mongoose.Schema(
   {
-    expenseId: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      default: () => new mongoose.Types.ObjectId(),
-    },
     amount: Number,
     date: Date,
     description: String,
+    budgetId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Budget",
+      required: true,
+    },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

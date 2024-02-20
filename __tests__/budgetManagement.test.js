@@ -98,6 +98,7 @@ describe("Budget Management", () => {
       purpose: "Update Test",
       startDate: new Date(),
       endDate: new Date(),
+      groupId: new mongoose.Types.ObjectId(),
       userId: new mongoose.Types.ObjectId(),
       budgetType: "personal",
     }).save();
@@ -105,13 +106,15 @@ describe("Budget Management", () => {
     const response = await request(app)
       .put(`/api/budgets/${budgetToUpdate._id}`)
       .set("Authorization", `Bearer ${token}`)
-      .send({ purpose: "Updated Purpose" });
+      .send({
+        purpose: "Updated Purpose",
+        totalBudget: 2000,
+        startDate: budgetToUpdate.startDate,
+        endDate: new Date(),
+      });
     expect(response.statusCode).toBe(200);
     expect(response.body.data).toHaveProperty("purpose", "Updated Purpose");
-    expect(response.body.data).toHaveProperty(
-      "userId",
-      budgetToUpdate.userId.toString()
-    );
+    expect(response.body.data).toHaveProperty("totalBudget", 2000);
   });
 
   test("Should delete a specific budget by budgetId", async () => {
@@ -129,7 +132,10 @@ describe("Budget Management", () => {
       .delete(`/api/budgets/${budgetToDelete._id}`)
       .set("Authorization", `Bearer ${token}`);
     expect(response.statusCode).toBe(200);
-    expect(response).toHaveProperty("text", "Budget deleted successfully");
+    expect(response.body).toHaveProperty(
+      "message",
+      "Budget deleted successfully"
+    );
   });
 
   test("Should fetch all budgets", async () => {

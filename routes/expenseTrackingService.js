@@ -1,156 +1,123 @@
 const express = require("express");
-const jwt = require("jsonwebtoken");
-const Expenses = require("../models/expense");
+const Expense = require("../models/expense");
 
 const router = express.Router();
 
-router.get("/:groupId", async (req, res) => {
+router.get("/:groupId", async (req, res, next) => {
   const groupId = req.params.groupId;
 
   try {
-    Expenses.find({ groupId: groupId }).toArray((error, result) => {
-      if (error) {
-        res.status(500).send(error.toString());
-      } else {
-        res.status(200).json(result);
-      }
-    });
-  } catch (error) {
-    res.status(500).send(error.toString());
-  }
-  try {
-    Expenses.find({ groupId: groupId }).toArray((error, result) => {
-      if (error) {
-        res.status(500).send(error.toString());
-      } else {
-        res.status(200).json(result);
-      }
-    });
-  } catch (error) {
-    res.status(500).send(error.toString());
-  }
-});
-
-router.get("", async (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1]; // Bearer <token>
-
-  if (!token) {
-    return res.status(401).send("Access Denied / Unauthorized request");
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const expenses = await Expenses.find({ members: decoded.userId });
-
+    const expenses = await Expense.find({ groupId: groupId });
     res.status(200).json(expenses);
   } catch (error) {
-    res.status(500).send(error.toString());
+    next(error);
   }
 });
 
-router.post("", async (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1]; // Bearer <token>
+router.get("", async (req, res, next) => {
+  try {
+    const expenses = await Expense.find({ members: req.user._id });
+    res.status(200).json(expenses);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("", async (req, res, next) => {
+  const { budgetId, amount, date, categoryId, description, groupId } = req.body;
+
+  if (
+    !amount ||
+    !date ||
+    !categoryId ||
+    !description ||
+    !budgetId ||
+    !groupId
+  ) {
+    return res.status(400).json({ message: "Missing required fields" });
+  }
 
   try {
-    if (token) {
-      const verified = jwt.verify(token, process.env.JWT_SECRET);
-      if (!verified) {
-        return res.status(401).send("Access Denied / Unauthorized request");
-      }
+    const newExpense = new Expense({
+      budgetId,
+      amount,
+      date,
+      category: categoryId,
+      description,
+      userId: req.user._id,
+      groupId: groupId || null,
+    });
 
-      const newExpense = new Expenses({
-        amount: req.body.amount,
-        date: req.body.date,
-        category: req.body.category,
-        description: req.body.description,
-        userId: verified.userId,
-        groupId: req.body.groupId,
-      });
-
-      await newExpense.save();
-      res.status(201).json({
-        message: "Expense created successfully",
-        data: newBudget,
-      });
-    } else {
-      const newExpense = new Expenses({
-        amount: req.body.amount,
-        date: req.body.date,
-        category: req.body.category,
-        description: req.body.description,
-        userId: null,
-        groupId: null,
-      });
-
-      await newExpense.save();
-      res.status(201).json({
-        message: "Expense created successfully",
-        data: newBudget,
-      });
-    }
+    await newExpense.save();
+    res.status(201).json({
+      message: "Expense created successfully",
+      data: newExpense,
+    });
   } catch (error) {
-    res.status(500).send(error.toString());
+    next(error);
   }
 });
 
-router.get("/:expenseId", async (req, res) => {
+router.get("/:expenseId", async (req, res, next) => {
   const { expenseId } = req.params;
 
   try {
-    const expense = await Group.findById(expenseId);
+    const expense = await Expense.findById(expenseId);
 
-    if (expense) {
-      res.status(200).json(expense);
-    } else {
-      res.status(404).send("Expense not found");
+    if (!expense) {
+      return res.status(404).json({ message: "Expense not found" });
     }
+
+    res.status(200).json(expense);
   } catch (error) {
-    res.status(500).send(error.toString());
+    next(error);
   }
 });
 
-router.put("/:expenseId", async (req, res) => {
+router.put("/:expenseId", async (req, res, next) => {
   const { expenseId } = req.params;
-  const { amount, date, category, description, userId, groupId } = req.body;
+  const { amount, date, category, description } = req.body;
 
-  if (!amount || !date || !category || !description || !userId) {
+  if (!amount || !date || !category || !description) {
     return res.status(400).json({
-      message: "amount, date, category, description, and userId are required.",
+      message:
+        "All fields are required: amount, date, category, and description.",
     });
   }
 
-  const updateObj = {
-    amount,
-    date,
-    category,
-    description,
-    userId,
-    groupId,
-  };
-
   try {
-    const updatedGroup = await Expenses.findByIdAndUpdate(
+    const updatedExpense = await Expense.findByIdAndUpdate(
       expenseId,
-      { $set: updateObj },
+      { $set: { amount, date, category, description } },
       { new: true }
     );
+
+    if (!updatedExpense) {
+      return res.status(404).json({ message: "Expense not found" });
+    }
+
     res.status(200).json({
-      message: "expense updated successfully",
-      data: updatedGroup,
+      message: "Expense updated successfully",
+      data: updatedExpense,
     });
   } catch (error) {
-    res.status(500).send(error.toString());
+    next(error);
   }
 });
 
-router.delete("/:expenseId", async (req, res) => {
-  const expenseId = req.params.budgetId;
+router.delete("/:expenseId", async (req, res, next) => {
+  const { expenseId } = req.params;
 
   try {
-    Expenses.findByIdAndDelete(expenseId);
-    res.status(200).send("Expense deleted successfully");
+    const result = await Expense.findByIdAndDelete(expenseId);
+
+    if (!result) {
+      return res.status(404).json({ message: "Expense not found" });
+    }
+
+    res.status(200).json({ message: "Expense deleted successfully" });
   } catch (error) {
-    res.status(500).send(error.toString());
+    next(error);
   }
 });
 

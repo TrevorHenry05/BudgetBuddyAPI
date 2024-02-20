@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const requireAuth = require("./middlewares/requireAuth");
+const handleError = require("./middlewares/handleError");
 const userAuthRoutes = require("./routes/userAuth");
 const userManagementRoutes = require("./routes/userManagement");
 const budgetManagementRoutes = require("./routes/budgetManagement");
@@ -28,5 +29,7 @@ mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error(err));
+
+app.use(handleError);
 
 module.exports = app;
