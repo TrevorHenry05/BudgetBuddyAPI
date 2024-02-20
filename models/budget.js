@@ -2,11 +2,6 @@ const mongoose = require("mongoose");
 
 const BudgetSchema = new mongoose.Schema(
   {
-    budgetId: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      default: () => new mongoose.Types.ObjectId(),
-    },
     totalBudget: Number,
     purpose: String,
     startDate: Date,
