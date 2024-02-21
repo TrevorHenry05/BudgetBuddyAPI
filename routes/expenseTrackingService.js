@@ -42,7 +42,7 @@ router.post("", async (req, res, next) => {
       budgetId,
       amount,
       date,
-      category: categoryId,
+      categoryId: categoryId,
       description,
       userId: req.user._id,
       groupId: groupId || null,
@@ -76,9 +76,9 @@ router.get("/:expenseId", async (req, res, next) => {
 
 router.put("/:expenseId", async (req, res, next) => {
   const { expenseId } = req.params;
-  const { amount, date, category, description } = req.body;
+  const { amount, date, categoryId, description } = req.body;
 
-  if (!amount || !date || !category || !description) {
+  if (!amount || !date || !categoryId || !description) {
     return res.status(400).json({
       message:
         "All fields are required: amount, date, category, and description.",
@@ -88,7 +88,7 @@ router.put("/:expenseId", async (req, res, next) => {
   try {
     const updatedExpense = await Expense.findByIdAndUpdate(
       expenseId,
-      { $set: { amount, date, category, description } },
+      { $set: { amount, date, categoryId, description } },
       { new: true }
     );
 
