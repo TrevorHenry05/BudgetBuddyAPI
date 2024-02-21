@@ -1,20 +1,60 @@
 const express = require("express");
 const axios = require("axios");
+const ExpenseCategory = require("../models/expenseCategory");
+const User = require("../models/user");
 
 const router = express.Router();
 
-const aggregateUserData = (expenses, budgets) => {
-  const aggregatedBudgets = budgets.map((budget) => ({
-    _id: budget._id,
-    totalBudget: budget.totalBudget,
-    purpose: budget.purpose,
-    startDate: budget.startDate,
-    endDate: budget.endDate,
-    userId: budget.userId,
-    groupId: budget.groupId,
-    budgetType: budget.budgetType,
-    expenses: expenses.filter((expense) => expense.budgetId === budget._id),
-  }));
+const aggregateUserData = async (expenses, budgets) => {
+  const aggregatedBudgets = await Promise.all(
+    budgets.map(async (budget) => {
+      const expensesForBudget = expenses.filter(
+        (expense) => expense.budgetId === budget._id
+      );
+      const expensesWithDetails = await Promise.all(
+        expensesForBudget.map(async (expense) => {
+          const category = await ExpenseCategory.findById(expense.categoryId);
+          const user = await User.findById(expense.userId);
+          return {
+            _id: expense._id,
+            amount: expense.amount,
+            date: expense.date,
+            description: expense.description,
+            categoryName: category.categoryName,
+            budgetId: expense.budgetId,
+            user:
+              user == null
+                ? null
+                : {
+                    _id: user._id,
+                    username: user.username,
+                  },
+            groupId: expense.groupId,
+          };
+        })
+      );
+
+      const user = await User.findById(budget.userId);
+
+      return {
+        _id: budget._id,
+        totalBudget: budget.totalBudget,
+        purpose: budget.purpose,
+        startDate: budget.startDate,
+        endDate: budget.endDate,
+        user:
+          user == null
+            ? null
+            : {
+                _id: user._id,
+                username: user.username,
+              },
+        groupId: budget.groupId,
+        budgetType: budget.budgetType,
+        expenses: expensesWithDetails,
+      };
+    })
+  );
 
   return aggregatedBudgets;
 };
@@ -46,7 +86,7 @@ router.get("/user", async (req, res, next) => {
     console.log(userBudgets);
 
     res.status(200).json({
-      aggregatedData: aggregateUserData(userExpenses, userBudgets),
+      aggregatedData: await aggregateUserData(userExpenses, userBudgets),
     });
   } catch (error) {
     if (error.response) {

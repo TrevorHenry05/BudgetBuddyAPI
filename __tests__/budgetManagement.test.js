@@ -5,14 +5,16 @@ const Budget = require("../models/budget");
 const User = require("../models/user");
 
 let token;
+let userId;
 
 beforeAll(async () => {
+  process.env.NODE_ENV === "test" &&
+    require("dotenv").config({ path: ".env.test" });
+
   await mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   });
-  await User.deleteMany();
-  await Budget.deleteMany();
 
   const user = new User({
     email: "testbudget@example.com",
@@ -20,6 +22,7 @@ beforeAll(async () => {
     username: "testuserbudget",
   });
   await user.save();
+  userId = user._id;
 
   const response = await request(app).post("/api/auth/login").send({
     email: "testbudget@example.com",
@@ -30,7 +33,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await Budget.deleteMany();
-  await User.deleteMany();
+  await User.deleteOne({ _id: userId });
   await mongoose.connection.close();
 });
 

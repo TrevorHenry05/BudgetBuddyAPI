@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const User = require("../models/user");
 
 let token;
+let user;
 
 beforeAll(async () => {
   // Set up environment and database connection
@@ -14,9 +15,9 @@ beforeAll(async () => {
   await mongoose.connect(process.env.MONGODB_URI);
 
   // Create a test user and log in to get a token
-  await User.create({
+  user = await User.create({
     email: "test@example.com",
-    username: "testuser",
+    username: "testusermanagement",
     password: "password",
   });
   const response = await request(app)
@@ -27,7 +28,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   // Clean up: remove test user and close DB connection
-  await User.deleteMany({});
+  await User.deleteOne({ _id: user._id });
   await mongoose.connection.close();
 });
 

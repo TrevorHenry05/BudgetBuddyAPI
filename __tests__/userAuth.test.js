@@ -19,7 +19,7 @@ afterAll(async () => {
 describe("User Authentication Service", () => {
   test("POST /register - should register a new user and return a token", async () => {
     const userData = {
-      username: "testUser",
+      username: "testUserauth",
       email: "testauth@example.com",
       password: "password123",
     };

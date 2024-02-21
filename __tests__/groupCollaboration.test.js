@@ -8,7 +8,11 @@ let token;
 let userId;
 
 beforeAll(async () => {
+  process.env.NODE_ENV === "test" &&
+    require("dotenv").config({ path: ".env.test" });
+
   await mongoose.connect(process.env.MONGODB_URI);
+
   const user = await User.create({
     email: "usergroup@example.com",
     username: "testgroupuser",
@@ -24,7 +28,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await Group.deleteMany();
-  await User.deleteMany();
+  await User.deleteOne({ _id: userId });
   await mongoose.connection.close();
 });
 
