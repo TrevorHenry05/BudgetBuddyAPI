@@ -65,4 +65,71 @@ describe("Expense Management", () => {
             .set("Authorization", `Bearer ${token}`);
         expect(response.statusCode).toBe(200);
     });
+
+    test("Fetch all expenses", async () => {
+        const response = await request(app)
+            .get("/api/expenses")
+            .set("Authorization", `Bearer ${token}`);
+        expect(response.statusCode).toBe(200);
+        expect(Array.isArray(response.body)).toBeTruthy();
+    });
+
+    test("Fetch specific expense by id", async () => {
+        const newExpense = await new Expense({
+            amount: 10000,
+            date: new Date(),
+            description: `Expense 1`,
+            userId: new mongoose.Types.Object(),
+            groupId: new mongoose.Types.Object(),
+            categoryId: new mongoose.Types.Object(),
+        }).save();
+    
+        const response = await request(app)
+          .get(`/api/budgets/${newExpense._id}`)
+          .set("Authorization", `Bearer ${token}`);
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toHaveProperty("_id", newExpense._id.toString());
+      });
+
+      test("Update specific expense by expenseId", async () => {
+        const newExpense = await new Expense({
+            amount: 10000,
+            date: new Date(),
+            description: `Expense 1`,
+            userId: new mongoose.Types.Object(),
+            groupId: new mongoose.Types.Object(),
+            categoryId: new mongoose.Types.Object(),
+        }).save();
+    
+        const response = await request(app)
+          .put(`/api/expenses/${newExpense._id}`)
+          .set("Authorization", `Bearer ${token}`)
+          .send({
+            amount: 500,
+            description: `Expense Update`,
+          });
+        expect(response.statusCode).toBe(200);
+        expect(response.body.data).toHaveProperty("description", "Expense Update");
+        expect(response.body.data).toHaveProperty("amount", 500);
+      });
+
+      test("Delete specific expense by expenseId", async () => {
+        const newExpense = await new Expense({
+            amount: 10000,
+            date: new Date(),
+            description: `Expense to delete`,
+            userId: new mongoose.Types.Object(),
+            groupId: new mongoose.Types.Object(),
+            categoryId: new mongoose.Types.Object(),
+        }).save();
+    
+        const response = await request(app)
+          .delete(`/api/expenses/${newExpense._id}`)
+          .set("Authorization", `Bearer ${token}`);
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toHaveProperty(
+          "message",
+          "Expense deleted successfully"
+        );
+      });
 });
