@@ -9,7 +9,7 @@ const ExpenseCategory = require("./models/expenseCategory");
 const Expense = require("./models/expense");
 const Budget = require("./models/budget");
 
-require("dotenv").config(); // Ensure this is used if your DB URI is stored in .env
+require("dotenv").config();
 
 const getRandomSubset = (array, subsetSize) => {
   const shuffled = array.sort(() => 0.5 - Math.random());
@@ -50,40 +50,44 @@ async function insertExpenseCategories() {
 }
 
 async function createExpensesAndBudgets(users, groups, categories) {
-  const expenses = [];
-  const budgets = [];
-
+  let budgets = [];
   for (let i = 0; i < 10; i++) {
     const user = users[i % users.length];
     const group = groups[i % groups.length];
-    const category = categories[i % categories.length];
 
-    const expense = new Expense({
-      amount: Math.floor(Math.random() * 100) + 1,
-      date: new Date(),
-      description: `Expense ${i + 1}`,
+    const budget = new Budget({
+      totalBudget: Math.floor(Math.random() * 1000) + 500,
+      purpose: `Budget ${i + 1}`,
+      startDate: new Date(),
+      endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
       userId: user._id,
-      groupId: group._id,
-      categoryId: category._id,
+      groupId: i % 2 === 0 ? null : group._id,
+      budgetType: i % 2 === 0 ? "personal" : "group",
     });
-    expenses.push(expense);
-
-    if (i < 5) {
-      const budget = new Budget({
-        totalBudget: Math.floor(Math.random() * 1000) + 500,
-        purpose: `Budget ${i + 1}`,
-        startDate: new Date(),
-        endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
-        userId: user._id,
-        groupId: group._id,
-        budgetType: i % 2 === 0 ? "personal" : "group",
-      });
-      budgets.push(budget);
-    }
+    budgets.push(budget);
   }
 
+  budgets = await Budget.insertMany(budgets);
+
+  let expenses = [];
+  budgets.forEach((budget) => {
+    for (let j = 0; j < 3; j++) {
+      const hashCode = budget._id.toString().split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const categoryIndex = (hashCode + j) % categories.length;
+      const category = categories[categoryIndex];
+      expenses.push(new Expense({
+        amount: Math.floor(Math.random() * 100) + 1,
+        date: new Date(),
+        description: `Expense ${j + 1} for ${budget.purpose}`,
+        budgetId: budget._id,
+        categoryId: category._id,
+        userId: budget.userId,
+        groupId: budget.groupId,
+      }));
+    }
+  });
+
   await Expense.insertMany(expenses);
-  await Budget.insertMany(budgets);
 }
 
 async function main() {
@@ -110,3 +114,4 @@ async function main() {
 }
 
 main();
+

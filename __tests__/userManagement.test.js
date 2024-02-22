@@ -1,5 +1,5 @@
 const request = require("supertest");
-const app = require("../app"); // Adjust this path to your Express app's entry point
+const app = require("../app");
 const mongoose = require("mongoose");
 const User = require("../models/user");
 
