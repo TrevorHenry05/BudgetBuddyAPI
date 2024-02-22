@@ -83,11 +83,13 @@ describe("Expense Management", () => {
             groupId: new mongoose.Types.ObjectId(),
             categoryId: new mongoose.Types.ObjectId(),
         }).save();
-    
+        
+        //console.log("Expense ID: " + newExpense._id);
         const response = await request(app)
-          .get(`/api/budgets/${newExpense._id}`)
+          .get(`/api/expenses/${newExpense._id}`)
           .set("Authorization", `Bearer ${token}`);
         expect(response.statusCode).toBe(200);
+        //console.log(response);
         expect(response.body).toHaveProperty("_id", newExpense._id.toString());
       });
 
@@ -106,6 +108,8 @@ describe("Expense Management", () => {
           .set("Authorization", `Bearer ${token}`)
           .send({
             amount: 500,
+            date: new Date(),
+            categoryId: new mongoose.Types.ObjectId(),
             description: `Expense Update`,
           });
         expect(response.statusCode).toBe(200);

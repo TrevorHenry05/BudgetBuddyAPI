@@ -5,11 +5,6 @@ const ExpenseSchema = new mongoose.Schema(
     amount: Number,
     date: Date,
     description: String,
-    budgetId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Budget",
-      required: true,
-    },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

@@ -24,14 +24,13 @@ router.get("", async (req, res, next) => {
 });
 
 router.post("", async (req, res, next) => {
-  const { budgetId, amount, date, categoryId, description, groupId } = req.body;
+  const {amount, date, categoryId, description, groupId } = req.body;
 
   if (
     !amount ||
     !date ||
     !categoryId ||
     !description ||
-    !budgetId ||
     !groupId
   ) {
     return res.status(400).json({ message: "Missing required fields" });
@@ -39,7 +38,6 @@ router.post("", async (req, res, next) => {
 
   try {
     const newExpense = new Expense({
-      budgetId,
       amount,
       date,
       categoryId: categoryId,
@@ -62,12 +60,17 @@ router.get("/:expenseId", async (req, res, next) => {
   const { expenseId } = req.params;
 
   try {
+    const isValidObjectId = mongoose.Types.ObjectId.isValid(expenseId);
+    if (!isValidObjectId) {
+      return res.status(400).json({ message: "Invalid expenseId" });
+    }
+
     const expense = await Expense.findById(expenseId);
 
     if (!expense) {
       return res.status(404).json({ message: "Expense not found" });
     }
-
+    let obj = JSON.parse(expense);
     res.status(200).json(expense);
   } catch (error) {
     next(error);
