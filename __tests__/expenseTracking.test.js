@@ -38,9 +38,9 @@ describe("Expense Management", () => {
             amount: 10000,
             date: new Date(),
             description: `Expense 1`,
-            userId: new mongoose.Types.Object(),
-            groupId: new mongoose.Types.Object(),
-            categoryId: new mongoose.Types.Object(),
+            userId: new mongoose.Types.ObjectId(),
+            groupId: new mongoose.Types.ObjectId(),
+            categoryId: new mongoose.Types.ObjectId(),
         };
         const response = await request(app)
             .post("/api/expenses")
@@ -56,9 +56,9 @@ describe("Expense Management", () => {
             amount: 10000,
             date: new Date(),
             description: `Expense 1`,
-            userId: new mongoose.Types.Object(),
-            groupId: new mongoose.Types.Object(),
-            categoryId: new mongoose.Types.Object(),
+            userId: new mongoose.Types.ObjectId(),
+            groupId: new mongoose.Types.ObjectId(),
+            categoryId: new mongoose.Types.ObjectId(),
         }).save();
         const response = await request(app)
             .get(`/api/expenses/${newExpense.groupId}`)
@@ -79,9 +79,9 @@ describe("Expense Management", () => {
             amount: 10000,
             date: new Date(),
             description: `Expense 1`,
-            userId: new mongoose.Types.Object(),
-            groupId: new mongoose.Types.Object(),
-            categoryId: new mongoose.Types.Object(),
+            userId: new mongoose.Types.ObjectId(),
+            groupId: new mongoose.Types.ObjectId(),
+            categoryId: new mongoose.Types.ObjectId(),
         }).save();
     
         const response = await request(app)
@@ -96,9 +96,9 @@ describe("Expense Management", () => {
             amount: 10000,
             date: new Date(),
             description: `Expense 1`,
-            userId: new mongoose.Types.Object(),
-            groupId: new mongoose.Types.Object(),
-            categoryId: new mongoose.Types.Object(),
+            userId: new mongoose.Types.ObjectId(),
+            groupId: new mongoose.Types.ObjectId(),
+            categoryId: new mongoose.Types.ObjectId(),
         }).save();
     
         const response = await request(app)
@@ -118,9 +118,9 @@ describe("Expense Management", () => {
             amount: 10000,
             date: new Date(),
             description: `Expense to delete`,
-            userId: new mongoose.Types.Object(),
-            groupId: new mongoose.Types.Object(),
-            categoryId: new mongoose.Types.Object(),
+            userId: new mongoose.Types.ObjectId(),
+            groupId: new mongoose.Types.ObjectId(),
+            categoryId: new mongoose.Types.ObjectId(),
         }).save();
     
         const response = await request(app)
