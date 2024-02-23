@@ -18,10 +18,10 @@ let serverRunning = true;
 
 beforeAll(async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    process.env.NODE_ENV === "test" &&
+      require("dotenv").config({ path: ".env" });
+      
+    await mongoose.connect(process.env.MONGODB_URI);
 
     try {
       const response = await axios.post(
@@ -69,10 +69,6 @@ beforeAll(async () => {
 afterAll(async () => {
   if (!serverRunning) return;
 
-  if (user) {
-    await User.deleteOne({ _id: userId });
-  }
-
   if (budget) {
     await Budget.deleteOne({ _id: budget._id });
   }
@@ -83,6 +79,10 @@ afterAll(async () => {
 
   if (expenseCategory) {
     await ExpenseCategory.deleteOne({ _id: expenseCategory._id });
+  }
+
+  if (user) {
+    await User.deleteOne({ _id: user._id });
   }
   await mongoose.connection.close();
 });

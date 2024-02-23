@@ -6,101 +6,68 @@ const User = require("../models/user");
 const router = express.Router();
 
 const aggregateUserData = async (expenses, budgets) => {
-  const aggregatedBudgets = await Promise.all(
-    budgets.map(async (budget) => {
-      const expensesForBudget = expenses.filter(
-        (expense) => expense.budgetId === budget._id
-      );
-      const expensesWithDetails = await Promise.all(
-        expensesForBudget.map(async (expense) => {
-          const category = await ExpenseCategory.findById(expense.categoryId);
-          const user = await User.findById(expense.userId);
-          return {
-            _id: expense._id,
-            amount: expense.amount,
-            date: expense.date,
-            description: expense.description,
-            categoryName: category.categoryName,
-            budgetId: expense.budgetId,
-            user:
-              user == null
-                ? null
-                : {
-                    _id: user._id,
-                    username: user.username,
-                  },
-            groupId: expense.groupId,
-          };
-        })
-      );
+  try {
+    const userIds = [...new Set(expenses.map(expense => expense.userId).concat(budgets.map(budget => budget.userId)))];
+    const categoryIds = [...new Set(expenses.map(expense => expense.categoryId))];
 
-      const user = await User.findById(budget.userId);
+    const [users, categories] = await Promise.all([
+      User.find({ _id: { $in: userIds } }),
+      ExpenseCategory.find({ _id: { $in: categoryIds } })
+    ]);
 
+    const userMap = new Map(users.map(user => [user._id.toString(), user]));
+    const categoryMap = new Map(categories.map(category => [category._id.toString(), category]));
+
+    return budgets.map(budget => {
+      const expensesForBudget = expenses.filter(expense => expense.budgetId.toString() === budget._id.toString());
+      const expensesWithDetails = expensesForBudget.map(expense => {
+        const category = categoryMap.get(expense.categoryId.toString());
+        const user = userMap.get(expense.userId.toString());
+        return {
+          _id: expense._id,
+          amount: expense.amount,
+          date: expense.date,
+          description: expense.description,
+          budgetId: expense.budgetId,
+          groupId: expense.groupId,
+          categoryName: category ? category.categoryName : null,
+          user: user ? { _id: user._id, username: user.username } : null,
+        };
+      });
+
+      const budgetUser = userMap.get(budget.userId.toString());
       return {
         _id: budget._id,
         totalBudget: budget.totalBudget,
         purpose: budget.purpose,
         startDate: budget.startDate,
         endDate: budget.endDate,
-        user:
-          user == null
-            ? null
-            : {
-                _id: user._id,
-                username: user.username,
-              },
         groupId: budget.groupId,
         budgetType: budget.budgetType,
+        user: budgetUser ? { _id: budgetUser._id, username: budgetUser.username } : null,
         expenses: expensesWithDetails,
       };
-    })
-  );
-
-  return aggregatedBudgets;
+    });
+  } catch (error) {
+    console.error("Error aggregating user data:", error);
+    throw error;
+  }
 };
 
-// Get aggregated user data
 router.get("/user", async (req, res, next) => {
   const token = req.headers.authorization;
   try {
-    // Fetch user expenses
-    const expensesResponse = await axios.get(
-      "http://localhost:3000/api/expenses",
-      {
-        headers: { Authorization: token },
-        timeout: 5000,
-      }
-    );
-    const userExpenses = expensesResponse.data;
-    console.log(userExpenses);
+    const [expensesResponse, budgetsResponse] = await Promise.all([
+      axios.get("http://localhost:3000/api/expenses/user", { headers: { Authorization: token }, timeout: 5000 }),
+      axios.get("http://localhost:3000/api/budgets/user", { headers: { Authorization: token }, timeout: 5000 })
+    ]);
 
-    // Fetch user budgets
-    const budgetsResponse = await axios.get(
-      "http://localhost:3000/api/budgets",
-      {
-        headers: { Authorization: token },
-        timeout: 5000,
-      }
-    );
-    const userBudgets = budgetsResponse.data;
-    console.log(userBudgets);
-
-    res.status(200).json({
-      aggregatedData: await aggregateUserData(userExpenses, userBudgets),
-    });
+    const aggregatedData = await aggregateUserData(expensesResponse.data, budgetsResponse.data);
+    res.status(200).json({ aggregatedData });
   } catch (error) {
-    if (error.response) {
-      return res
-        .status(error.response.status)
-        .json({ message: error.response.data.message });
-    } else if (error.request) {
-      return res.status(504).json({
-        message: "No response was received from the budget or expense service.",
-      });
-    } else {
-      return next(error);
-    }
+    next(error);
   }
 });
 
 module.exports = router;
+

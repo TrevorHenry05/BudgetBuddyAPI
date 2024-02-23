@@ -14,7 +14,7 @@ router.get("/group/:groupId", async (req, res, next) => {
   }
 });
 
-router.get("/users", async (req, res, next) => {
+router.get("/user", async (req, res, next) => {
   try {
     const expenses = await Expense.find({ userId: req.user._id });
     res.status(200).json(expenses);

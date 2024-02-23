@@ -13,7 +13,7 @@ const ExpenseSchema = new mongoose.Schema(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      default: null,
+      required: true,
     }, // Nullable
     groupId: {
       type: mongoose.Schema.Types.ObjectId,
