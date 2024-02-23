@@ -18,8 +18,7 @@ let serverRunning = true;
 
 beforeAll(async () => {
   try {
-    process.env.NODE_ENV === "test" &&
-      require("dotenv").config({ path: ".env" });
+    require("dotenv").config({ path: ".env" });
       
     await mongoose.connect(process.env.MONGODB_URI);
 

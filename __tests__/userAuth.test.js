@@ -3,6 +3,8 @@ const mongoose = require("mongoose");
 const app = require("../app");
 const User = require("../models/user");
 
+let token;
+
 beforeAll(async () => {
   process.env.NODE_ENV === "test" &&
     require("dotenv").config({ path: ".env.test" });
@@ -12,7 +14,6 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await User.deleteMany({});
   await mongoose.connection.close();
 });
 
@@ -37,7 +38,7 @@ describe("User Authentication Service", () => {
     const response = await request(app)
       .post("/api/auth/login")
       .send({ email: userData.email, password: userData.password });
-
+    token = response.body.token;
     expect(response.statusCode).toBe(200);
     expect(response.body).toHaveProperty("token");
   });
@@ -49,5 +50,17 @@ describe("User Authentication Service", () => {
 
     expect(response.statusCode).toBe(400);
     expect(response.body.message).toEqual("Invalid credentials");
+  });
+
+  test("DELETE /profile should delete the authenticated user's account", async () => {
+    const response = await request(app)
+      .delete("/api/users/profile")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty(
+      "message",
+      "User deleted successfully"
+    );
   });
 });
