@@ -54,7 +54,7 @@ const aggregateUserData = async (expenses, budgets) => {
   }
 };
 
-router.get("/user", async (req, res, next) => {
+router.get("", async (req, res, next) => {
   const token = req.headers.authorization;
   try {
     const [expensesResponse, budgetsResponse] = await Promise.all([

@@ -26,8 +26,8 @@ app.use("/api/budgets", budgetManagementRoutes);
 app.use("/api/expensecategories", expenseCategoryServiceRoutes);
 app.use("/api/groups", groupCollaborationServiceRoutes);
 app.use("/api/expenses", expenseTrackingServiceRoutes);
-app.use("/api/aggregation", userAggregationRoutes);
-app.use("/api/aggregation", groupAggregationRoutes);
+app.use("/api/aggregation/user", userAggregationRoutes);
+app.use("/api/aggregation/group", groupAggregationRoutes);
 
 mongoose
   .connect(process.env.MONGODB_URI)

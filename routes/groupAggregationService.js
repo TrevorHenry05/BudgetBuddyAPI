@@ -54,7 +54,7 @@ const aggregateGroupData = async (expenses, budgets) => {
   }
 };
 
-router.get("/group/:groupId", async (req, res, next) => {
+router.get("/:groupId", async (req, res, next) => {
   const token = req.headers.authorization;
   const groupId = req.params.groupId;
   try {
