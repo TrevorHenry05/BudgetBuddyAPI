@@ -138,61 +138,6 @@ const generateExpensesPerMonthChart = (data) => {
   };
 };
 
-const generateExpensesPerUserChart = (data) => {
-  let expensesPerUser = {};
-  data.forEach((budget) => {
-    budget.expenses.forEach((expense) => {
-      if (!expensesPerUser[expense.user.username]) {
-        expensesPerUser[expense.user.username] = 0;
-      }
-      expensesPerUser[expense.user.username] += expense.amount;
-    });
-  });
-
-  const chart = new QuickChart();
-  chart.setConfig({
-    type: "bar",
-    data: {
-      labels: Object.keys(expensesPerUser),
-      datasets: [
-        {
-          label: "User Expenses",
-          data: Object.values(expensesPerUser),
-          backgroundColor: colors.lightPurple,
-          borderColor: colors.turquoise,
-          borderWidth: 1,
-        },
-      ],
-    },
-    options: {
-      scales: {
-        y: {
-          beginAtZero: true,
-          title: {
-            display: true,
-            text: "Expense Amount ($)",
-          },
-        },
-      },
-      plugins: {
-        legend: {
-          display: true,
-          position: "top",
-        },
-        title: {
-          display: true,
-          text: "User Expenses Overview",
-        },
-      },
-    },
-  });
-
-  return {
-    chartUrl: chart.getUrl(),
-    expensesPerUser,
-  };
-};
-
 generateExpensesPerExpenseCategoryChart = (data) => {
   let expensesPerCategory = {};
   data.forEach((budget) => {
@@ -248,12 +193,11 @@ generateExpensesPerExpenseCategoryChart = (data) => {
   };
 };
 
-router.get("/:groupId", async (req, res, next) => {
-  const { groupId } = req.params;
+router.get("", async (req, res, next) => {
   const token = req.headers.authorization;
   try {
     const response = await axios.get(
-      `http://localhost:3000/api/aggregation/group/${groupId}`,
+      `http://localhost:3000/api/aggregation/user`,
       {
         headers: { Authorization: token },
         timeout: 5000,
@@ -265,10 +209,9 @@ router.get("/:groupId", async (req, res, next) => {
     res.status(200).json({
       percentOfBudgetsUsed: generatePercentOfBudgetsUsedCharts(aggregatedData),
       expensesPerMonth: generateExpensesPerMonthChart(aggregatedData),
-      expensesPerUser: generateExpensesPerUserChart(aggregatedData),
       expensesPerCategory:
         generateExpensesPerExpenseCategoryChart(aggregatedData),
-      aggregatedGroupData: aggregatedData,
+      aggregatedUserData: aggregatedData,
     });
   } catch (error) {
     next(error);
