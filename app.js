@@ -10,6 +10,7 @@ const expenseCategoryServiceRoutes = require("./routes/expenseCategoryService");
 const groupCollaborationServiceRoutes = require("./routes/groupCollaborationService");
 const expenseTrackingServiceRoutes = require("./routes/expenseTrackingService");
 const userAggregationRoutes = require("./routes/userAggregationService");
+const groupAggregationRoutes = require("./routes/groupAggregationService");
 require("dotenv").config();
 
 const app = express();
@@ -26,6 +27,7 @@ app.use("/api/expensecategories", expenseCategoryServiceRoutes);
 app.use("/api/groups", groupCollaborationServiceRoutes);
 app.use("/api/expenses", expenseTrackingServiceRoutes);
 app.use("/api/aggregation", userAggregationRoutes);
+app.use("/api/aggregation", groupAggregationRoutes);
 
 mongoose
   .connect(process.env.MONGODB_URI)
