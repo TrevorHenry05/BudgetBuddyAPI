@@ -3,7 +3,7 @@ const Expense = require("../models/expense");
 
 const router = express.Router();
 
-router.get("/:groupId", async (req, res, next) => {
+router.get("/group/:groupId", async (req, res, next) => {
   const groupId = req.params.groupId;
 
   try {
@@ -14,7 +14,7 @@ router.get("/:groupId", async (req, res, next) => {
   }
 });
 
-router.get("", async (req, res, next) => {
+router.get("/users", async (req, res, next) => {
   try {
     const expenses = await Expense.find({ userId: req.user._id });
     res.status(200).json(expenses);

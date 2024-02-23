@@ -76,6 +76,7 @@ describe("Budget Management", () => {
       .get(`/api/budgets/group/${newBudget.groupId}`)
       .set("Authorization", `Bearer ${token}`);
     expect(response.statusCode).toBe(200);
+    expect(Array.isArray(response.body)).toBeTruthy();
   });
 
   test("Should fetch a specific budget by budgetId", async () => {
