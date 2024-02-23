@@ -22,7 +22,7 @@ let serverRunning = true;
 beforeAll(async () => {
   try {
     require("dotenv").config({ path: ".env" });
-      
+
     await mongoose.connect(process.env.MONGODB_URI);
 
     try {
@@ -56,6 +56,7 @@ beforeAll(async () => {
     await user.save();
     userId = user._id;
     console.log("User created:", await User.findById(userId));
+
     const result = await request(app).post("/api/auth/login").send({
       email: "testaggregategroup@example.com",
       password: "password123",
@@ -99,8 +100,8 @@ describe("Group Data Aggregation Service", () => {
       return;
     }
     group = await new Group({
-        groupName: "Test Group",
-        members: [userId],
+      groupName: "Test Group",
+      members: [userId],
     }).save();
 
     groupId = group._id;
@@ -141,7 +142,9 @@ describe("Group Data Aggregation Service", () => {
     ).toBeTruthy();
     expect(response.body.aggregatedData[0]._id).toBe(budget._id.toString());
     expect(response.body.aggregatedData[0].groupId).toBe(groupId.toString());
-    expect(response.body.aggregatedData[0].expenses[0]._id).toBe(expense._id.toString());
+    expect(response.body.aggregatedData[0].expenses[0]._id).toBe(
+      expense._id.toString()
+    );
     console.log("User created:", await User.findById(userId));
     console.log("Group created:", await Group.findById(groupId));
     console.log(response.body.aggregatedData);

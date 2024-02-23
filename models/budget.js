@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 // Function to format date to YYYY-MM-DD
 function formatDateToString(value) {
   const date = new Date(value);
-  return date.toISOString().split('T')[0];
+  return date.toISOString().split("T")[0];
 }
 
 const BudgetSchema = new mongoose.Schema(
@@ -12,11 +12,11 @@ const BudgetSchema = new mongoose.Schema(
     purpose: String,
     startDate: {
       type: String,
-      set: formatDateToString
+      set: formatDateToString,
     },
     endDate: {
       type: String,
-      set: formatDateToString
+      set: formatDateToString,
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -31,7 +31,7 @@ const BudgetSchema = new mongoose.Schema(
     budgetType: { type: String, enum: ["personal", "group"] },
     expenses: [{ type: mongoose.Schema.Types.ObjectId, ref: "Expense" }],
   },
-  { 
+  {
     timestamps: true,
     toObject: { virtuals: true },
     toJSON: { virtuals: true },
@@ -39,12 +39,12 @@ const BudgetSchema = new mongoose.Schema(
 );
 
 // Virtual for `startDate` as a Date object
-BudgetSchema.virtual('startDateAsDate').get(function() {
+BudgetSchema.virtual("startDateAsDate").get(function () {
   return this.startDate ? new Date(this.startDate) : null;
 });
 
 // Virtual for `endDate` as a Date object
-BudgetSchema.virtual('endDateAsDate').get(function() {
+BudgetSchema.virtual("endDateAsDate").get(function () {
   return this.endDate ? new Date(this.endDate) : null;
 });
 

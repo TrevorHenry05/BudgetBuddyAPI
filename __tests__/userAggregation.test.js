@@ -19,7 +19,7 @@ let serverRunning = true;
 beforeAll(async () => {
   try {
     require("dotenv").config({ path: ".env" });
-      
+
     await mongoose.connect(process.env.MONGODB_URI);
 
     try {
@@ -126,7 +126,9 @@ describe("User Data Aggregation Service", () => {
     ).toBeTruthy();
     expect(response.body.aggregatedData[0]._id).toBe(budget._id.toString());
     expect(response.body.aggregatedData[0].user._id).toBe(userId.toString());
-    expect(response.body.aggregatedData[0].expenses[0]._id).toBe(expense._id.toString());
+    expect(response.body.aggregatedData[0].expenses[0]._id).toBe(
+      expense._id.toString()
+    );
     console.log("User created:", await User.findById(userId));
     console.log(response.body.aggregatedData);
     console.log(response.body.aggregatedData[0].expenses[0]);
