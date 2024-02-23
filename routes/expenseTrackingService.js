@@ -3,7 +3,8 @@ const Expense = require("../models/expense");
 
 const router = express.Router();
 
-router.get("/:groupId", async (req, res, next) => {
+//GET EXPENSE BY GROUP ID
+router.get("/group/:groupId", async (req, res, next) => {
   const groupId = req.params.groupId;
 
   try {
@@ -14,7 +15,8 @@ router.get("/:groupId", async (req, res, next) => {
   }
 });
 
-router.get("", async (req, res, next) => {
+//GET EXPENSES BY USER ID
+router.get("/users", async (req, res, next) => {
   try {
     const expenses = await Expense.find({ userId: req.user._id });
     res.status(200).json(expenses);
@@ -23,6 +25,7 @@ router.get("", async (req, res, next) => {
   }
 });
 
+//CREATE NEW EXPENSE DOCUMENT
 router.post("", async (req, res, next) => {
   const {amount, date, categoryId, description, groupId } = req.body;
 
@@ -56,27 +59,23 @@ router.post("", async (req, res, next) => {
   }
 });
 
-router.get("/:expenseId", async (req, res, next) => {
+//GET EXPENSE BY EXPENSE ID
+router.get("/specificexpense/:expenseId", async (req, res, next) => {
   const { expenseId } = req.params;
 
   try {
-    const isValidObjectId = mongoose.Types.ObjectId.isValid(expenseId);
-    if (!isValidObjectId) {
-      return res.status(400).json({ message: "Invalid expenseId" });
-    }
-
     const expense = await Expense.findById(expenseId);
 
     if (!expense) {
       return res.status(404).json({ message: "Expense not found" });
     }
-    let obj = JSON.parse(expense);
     res.status(200).json(expense);
   } catch (error) {
     next(error);
   }
 });
 
+//UPDATE EXPENSE
 router.put("/:expenseId", async (req, res, next) => {
   const { expenseId } = req.params;
   const { amount, date, categoryId, description } = req.body;

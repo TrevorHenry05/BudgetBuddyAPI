@@ -61,14 +61,14 @@ describe("Expense Management", () => {
             categoryId: new mongoose.Types.ObjectId(),
         }).save();
         const response = await request(app)
-            .get(`/api/expenses/${newExpense.groupId}`)
+            .get(`/api/expenses/group/${newExpense.groupId}`)
             .set("Authorization", `Bearer ${token}`);
         expect(response.statusCode).toBe(200);
     });
 
     test("Fetch all expenses", async () => {
         const response = await request(app)
-            .get("/api/expenses")
+            .get("/api/expenses/users")
             .set("Authorization", `Bearer ${token}`);
         expect(response.statusCode).toBe(200);
         expect(Array.isArray(response.body)).toBeTruthy();
@@ -86,7 +86,7 @@ describe("Expense Management", () => {
         
         //console.log("Expense ID: " + newExpense._id);
         const response = await request(app)
-          .get(`/api/expenses/${newExpense._id}`)
+          .get(`/api/expenses/specificexpense/${newExpense._id}`)
           .set("Authorization", `Bearer ${token}`);
         expect(response.statusCode).toBe(200);
         //console.log(response);
