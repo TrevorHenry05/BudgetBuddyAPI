@@ -1,6 +1,8 @@
 const express = require("express");
 const Group = require("../models/group");
 const User = require("../models/user");
+const Budget = require("../models/budget");
+const Expense = require("../models/expense");
 
 const router = express.Router();
 
@@ -150,7 +152,7 @@ router.delete("/:groupId", async (req, res, next) => {
   const { groupId } = req.params;
 
   try {
-    const group = await Group.findById(groupId);
+    const group = await Group.findByIdAndDelete(groupId);
     if (!group) {
       return res.status(404).json({ message: "Group not found" });
     }
@@ -159,7 +161,9 @@ router.delete("/:groupId", async (req, res, next) => {
       return res.status(403).json({ message: "Unauthorized" });
     }
 
-    await Group.findByIdAndDelete(groupId);
+    await Budget.deleteMany({ groupId: groupId });
+    await Expense.deleteMany({ groupId: groupId });
+
     res.status(200).json({ message: "Group deleted successfully" });
   } catch (error) {
     next(error);
