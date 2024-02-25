@@ -11,7 +11,12 @@ router.get("/profile", async (req, res, next) => {
       return res.status(404).json({ message: "User not found" });
     }
     const { password, ...userWithoutPassword } = user.toObject();
-    res.json(userWithoutPassword);
+    res.json({
+      _id: userWithoutPassword._id,
+      username: userWithoutPassword.username,
+      email: userWithoutPassword.email,
+      isAdmin: userWithoutPassword.isAdmin,
+    });
   } catch (error) {
     next(error);
   }

@@ -1,5 +1,9 @@
 const express = require("express");
 const Budget = require("../models/budget");
+const Group = require("../models/group");
+const User = require("../models/user");
+const Expense = require("../models/expense");
+const ExpenseCategory = require("../models/expenseCategory");
 
 const router = express.Router();
 
@@ -61,7 +65,61 @@ router.get("/:budgetId", async (req, res, next) => {
     if (!budget) {
       return res.status(404).json({ message: "Budget not found" });
     }
-    res.status(200).json(budget);
+
+    const user = await User.findById(budget.userId).select("-password");
+    const group = budget.groupId ? await Group.findById(budget.groupId) : null;
+    const expenses = await Expense.find({ budgetId: budget._id });
+    const expensesWithDetails = await Promise.all(
+      expenses.map(async (expense) => {
+        const category = await ExpenseCategory.findById(expense.categoryId);
+        const user = await User.findById(expense.userId).select("-password");
+        const group = expense.groupId
+          ? await Group.findById(expense.groupId)
+          : null;
+        return {
+          _id: expense._id,
+          amount: expense.amount,
+          date: expense.date,
+          description: expense.description,
+          category: category ? { categoryName: category.categoryName } : null,
+          user: user
+            ? {
+                _id: user._id,
+                username: user.username,
+                email: user.email,
+              }
+            : null,
+          group: group
+            ? {
+                _id: group._id,
+                groupName: group.groupName,
+              }
+            : null,
+        };
+      })
+    );
+
+    res.status(200).json({
+      _id: budget._id,
+      totalBudget: budget.totalBudget,
+      purpose: budget.purpose,
+      startDate: budget.startDate,
+      endDate: budget.endDate,
+      user: user
+        ? {
+            _id: user._id,
+            username: user.username,
+            email: user.email,
+          }
+        : null,
+      group: group
+        ? {
+            _id: group._id,
+            groupName: group.groupName,
+          }
+        : null,
+      expenses: expensesWithDetails,
+    });
   } catch (error) {
     next(error);
   }

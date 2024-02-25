@@ -1,5 +1,8 @@
 const express = require("express");
 const Expense = require("../models/expense");
+const User = require("../models/user");
+const Group = require("../models/group");
+const ExpenseCategory = require("../models/expenseCategory");
 
 const router = express.Router();
 
@@ -63,7 +66,25 @@ router.get("/:expenseId", async (req, res, next) => {
     if (!expense) {
       return res.status(404).json({ message: "Expense not found" });
     }
-    res.status(200).json(expense);
+
+    const user = await User.findById(expense.userId).select("-password");
+    const group = expense.groupId
+      ? await Group.findById(expense.groupId)
+      : null;
+    const category = await ExpenseCategory.findById(expense.categoryId);
+
+    res.status(200).json({
+      _id: expense._id,
+      amount: expense.amount,
+      date: expense.date,
+      description: expense.description,
+      budgetId: expense.budgetId,
+      group: group ? { _id: group._id, groupName: group.groupName } : null,
+      category: category ? { categoryName: category.categoryName } : null,
+      user: user
+        ? { _id: user._id, username: user.username, email: user.email }
+        : null,
+    });
   } catch (error) {
     next(error);
   }
