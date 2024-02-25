@@ -13,12 +13,19 @@ const userAggregationRoutes = require("./routes/userAggregationService");
 const groupAggregationRoutes = require("./routes/groupAggregationService");
 const groupAnalysisRoutes = require("./routes/groupAnalysisService");
 const userAnalysisRoutes = require("./routes/userAnalysisService");
+const userAdminServiceRoutes = require("./routes/userAdminService");
 require("dotenv").config();
 
 const app = express();
 
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
 app.use("/api/auth", userAuthRoutes);
 
@@ -32,6 +39,7 @@ app.use("/api/aggregation/user", userAggregationRoutes);
 app.use("/api/aggregation/group", groupAggregationRoutes);
 app.use("/api/analysis/group", groupAnalysisRoutes);
 app.use("/api/analysis/user", userAnalysisRoutes);
+app.use("/api/admin", userAdminServiceRoutes);
 
 mongoose
   .connect(process.env.MONGODB_URI)

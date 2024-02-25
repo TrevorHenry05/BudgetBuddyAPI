@@ -28,6 +28,11 @@ const ExpenseSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "ExpenseCategory",
     },
+    budgetId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Budget",
+      default: null,
+    }, // Nullable
   },
   {
     timestamps: true,
