@@ -29,7 +29,6 @@ const BudgetSchema = new mongoose.Schema(
       default: null,
     }, // Nullable
     budgetType: { type: String, enum: ["personal", "group"] },
-    expenses: [{ type: mongoose.Schema.Types.ObjectId, ref: "Expense" }],
   },
   {
     timestamps: true,

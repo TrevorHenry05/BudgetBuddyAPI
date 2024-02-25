@@ -1,5 +1,6 @@
 const express = require("express");
 const Group = require("../models/group");
+const User = require("../models/user");
 
 const router = express.Router();
 
@@ -45,7 +46,18 @@ router.get("/:groupId", async (req, res, next) => {
     if (!group) {
       return res.status(404).json({ message: "Group not found" });
     }
-    res.status(200).json(group);
+
+    const members = await User.find({ _id: { $in: group.members } });
+
+    res.status(200).json({
+      _id: group._id,
+      groupName: group.groupName,
+      members: members.map((member) => ({
+        _id: member._id,
+        username: member.username,
+        email: member.email,
+      })),
+    });
   } catch (error) {
     next(error);
   }
