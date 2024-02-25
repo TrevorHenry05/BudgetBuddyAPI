@@ -24,9 +24,9 @@ const getBudgetDetails = async (budgets, expenses) => {
 
           .map(async (expense) => {
             const category = await ExpenseCategory.findById(expense.categoryId);
-            const user = await User.findById(expense.userId).select(
-              "-password"
-            );
+            const user = expense.userId
+              ? await User.findById(expense.userId).select("-password")
+              : null;
             const group = expense.groupId
               ? await Group.findById(expense.groupId)
               : null;

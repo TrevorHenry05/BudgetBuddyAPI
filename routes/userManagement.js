@@ -1,5 +1,8 @@
 const express = require("express");
 const User = require("../models/user");
+const Budget = require("../models/budget");
+const Expense = require("../models/expense");
+const Group = require("../models/group");
 
 const router = express.Router();
 
@@ -79,6 +82,16 @@ router.delete("/profile", async (req, res, next) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
+
+    await Group.updateMany(
+      { members: req.user._id },
+      { $pull: { members: req.user._id } }
+    );
+
+    await Budget.deleteMany({ userId: req.user._id });
+
+    await Expense.deleteMany({ userId: req.user._id });
+
     res.status(200).json({ message: "User deleted successfully" });
   } catch (error) {
     next(error);

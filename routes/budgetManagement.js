@@ -66,13 +66,17 @@ router.get("/:budgetId", async (req, res, next) => {
       return res.status(404).json({ message: "Budget not found" });
     }
 
-    const user = await User.findById(budget.userId).select("-password");
+    const user = budget.userId
+      ? await User.findById(budget.userId).select("-password")
+      : null;
     const group = budget.groupId ? await Group.findById(budget.groupId) : null;
     const expenses = await Expense.find({ budgetId: budget._id });
     const expensesWithDetails = await Promise.all(
       expenses.map(async (expense) => {
         const category = await ExpenseCategory.findById(expense.categoryId);
-        const user = await User.findById(expense.userId).select("-password");
+        const user = expense.userId
+          ? await User.findById(expense.userId).select("-password")
+          : null;
         const group = expense.groupId
           ? await Group.findById(expense.groupId)
           : null;
