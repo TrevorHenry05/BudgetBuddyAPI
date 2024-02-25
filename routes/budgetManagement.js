@@ -161,6 +161,9 @@ router.delete("/:budgetId", async (req, res, next) => {
     if (!deletedBudget) {
       return res.status(404).json({ message: "Budget not found" });
     }
+
+    await Expense.deleteMany({ budgetId: deletedBudget._id });
+
     res.status(200).json({ message: "Budget deleted successfully" });
   } catch (error) {
     next(error);
