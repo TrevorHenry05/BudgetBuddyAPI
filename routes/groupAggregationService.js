@@ -5,7 +5,7 @@ const User = require("../models/user");
 
 const router = express.Router();
 
-const aggregateUserData = async (expenses, budgets) => {
+const aggregateGroupData = async (expenses, budgets) => {
   try {
     const userIds = [
       ...new Set(
@@ -63,26 +63,27 @@ const aggregateUserData = async (expenses, budgets) => {
       };
     });
   } catch (error) {
-    console.error("Error aggregating user data:", error);
+    console.error("Error aggregating group data:", error);
     throw error;
   }
 };
 
-router.get("", async (req, res, next) => {
+router.get("/:groupId", async (req, res, next) => {
   const token = req.headers.authorization;
+  const groupId = req.params.groupId;
   try {
     const [expensesResponse, budgetsResponse] = await Promise.all([
-      axios.get("http://localhost:3000/api/expenses/user", {
+      axios.get(`http://localhost:3000/api/expenses/group/${groupId}`, {
         headers: { Authorization: token },
         timeout: 5000,
       }),
-      axios.get("http://localhost:3000/api/budgets/user", {
+      axios.get(`http://localhost:3000/api/budgets/group/${groupId}`, {
         headers: { Authorization: token },
         timeout: 5000,
       }),
     ]);
 
-    const aggregatedData = await aggregateUserData(
+    const aggregatedData = await aggregateGroupData(
       expensesResponse.data,
       budgetsResponse.data
     );

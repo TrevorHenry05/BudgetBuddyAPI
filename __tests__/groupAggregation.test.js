@@ -7,10 +7,13 @@ const Expense = require("../models/expense");
 const Budget = require("../models/budget");
 const User = require("../models/user");
 const ExpenseCategory = require("../models/expenseCategory");
+const Group = require("../models/group");
 
 let token;
 let userId;
+let groupId;
 let user;
+let group;
 let budget;
 let expense;
 let expenseCategory;
@@ -46,15 +49,16 @@ beforeAll(async () => {
 
     // Create and authenticate a user
     user = new User({
-      email: "testaggregate@example.com",
+      email: "testaggregategroup@example.com",
       password: "password123",
-      username: "testaggregationuser",
+      username: "testaggregationgroup",
     });
     await user.save();
     userId = user._id;
     console.log("User created:", await User.findById(userId));
+
     const result = await request(app).post("/api/auth/login").send({
-      email: "testaggregate@example.com",
+      email: "testaggregategroup@example.com",
       password: "password123",
     });
     token = result.body.token;
@@ -82,27 +86,38 @@ afterAll(async () => {
   if (user) {
     await User.deleteOne({ _id: user._id });
   }
+
+  if (group) {
+    await Group.deleteOne({ _id: group._id });
+  }
   await mongoose.connection.close();
 });
 
-describe("User Data Aggregation Service", () => {
-  test("Should aggregate user expenses and budgets", async () => {
+describe("Group Data Aggregation Service", () => {
+  test("Should aggregate group expenses and budgets", async () => {
     if (!serverRunning) {
       console.log("Test skipped because the server is not running.");
       return;
     }
+    group = await new Group({
+      groupName: "Test Group",
+      members: [userId],
+    }).save();
+
+    groupId = group._id;
     // Create test data for expenses and budgets
     budget = await new Budget({
       totalBudget: 1000,
       purpose: "Test Budget",
       startDate: new Date(),
       endDate: new Date(),
-      userId: userId,
+      userId,
+      groupId,
       budgetType: "personal",
     }).save();
 
     expenseCategory = await new ExpenseCategory({
-      categoryName: "Test User Category",
+      categoryName: "Test Group Category",
     }).save();
 
     expense = await new Expense({
@@ -111,12 +126,13 @@ describe("User Data Aggregation Service", () => {
       description: "Test Expense",
       budgetId: budget._id,
       userId,
+      groupId,
       categoryId: expenseCategory._id,
     }).save();
 
     // Test the aggregation endpoint
     const response = await request(app)
-      .get("/api/aggregation/user")
+      .get(`/api/aggregation/group/${groupId}`)
       .set("Authorization", `Bearer ${token}`);
 
     expect(response.statusCode).toBe(200);
@@ -125,11 +141,12 @@ describe("User Data Aggregation Service", () => {
       response.body.aggregatedData.some((budget) => budget.expenses.length >= 0)
     ).toBeTruthy();
     expect(response.body.aggregatedData[0]._id).toBe(budget._id.toString());
-    expect(response.body.aggregatedData[0].user._id).toBe(userId.toString());
+    expect(response.body.aggregatedData[0].groupId).toBe(groupId.toString());
     expect(response.body.aggregatedData[0].expenses[0]._id).toBe(
       expense._id.toString()
     );
     console.log("User created:", await User.findById(userId));
+    console.log("Group created:", await Group.findById(groupId));
     console.log(response.body.aggregatedData);
     console.log(response.body.aggregatedData[0].expenses[0]);
   });
