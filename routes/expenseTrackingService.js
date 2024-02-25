@@ -16,7 +16,7 @@ router.get("/group/:groupId", async (req, res, next) => {
 });
 
 //GET EXPENSES BY USER ID
-router.get("/users", async (req, res, next) => {
+router.get("/user", async (req, res, next) => {
   try {
     const expenses = await Expense.find({ userId: req.user._id });
     res.status(200).json(expenses);
@@ -27,15 +27,9 @@ router.get("/users", async (req, res, next) => {
 
 //CREATE NEW EXPENSE DOCUMENT
 router.post("", async (req, res, next) => {
-  const {amount, date, categoryId, description, groupId } = req.body;
+  const { amount, date, categoryId, description, groupId } = req.body;
 
-  if (
-    !amount ||
-    !date ||
-    !categoryId ||
-    !description ||
-    !groupId
-  ) {
+  if (!amount || !date || !categoryId || !description || !groupId) {
     return res.status(400).json({ message: "Missing required fields" });
   }
 
@@ -60,7 +54,7 @@ router.post("", async (req, res, next) => {
 });
 
 //GET EXPENSE BY EXPENSE ID
-router.get("/specificexpense/:expenseId", async (req, res, next) => {
+router.get("/:expenseId", async (req, res, next) => {
   const { expenseId } = req.params;
 
   try {

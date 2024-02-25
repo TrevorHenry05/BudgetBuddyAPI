@@ -34,7 +34,7 @@ beforeAll(async () => {
       if (!error.response) {
         console.log("Server is not running.", error.message);
         serverRunning = false;
-      } else if (error.response.status && error.response.status === 400) {
+      } else if (error.response.status && error.response.status === 401) {
         console.log("Server is up. Proceeding with tests.");
       } else {
         console.log("Server not responding as expected:", error.message);

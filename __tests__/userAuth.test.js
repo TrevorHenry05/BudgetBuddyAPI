@@ -48,7 +48,7 @@ describe("User Authentication Service", () => {
       .post("/api/auth/login")
       .send({ email: "wrong@example.com", password: "wrongPassword" });
 
-    expect(response.statusCode).toBe(400);
+    expect(response.statusCode).toBe(401);
     expect(response.body.message).toEqual("Invalid credentials");
   });
 
