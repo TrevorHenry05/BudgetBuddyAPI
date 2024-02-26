@@ -47,8 +47,6 @@ const generatePercentOfBudgetsUsedCharts = (data) => {
           },
         },
       })
-      .setWidth(200)
-      .setHeight(200)
       .setBackgroundColor("transparent");
 
     usedBudgetGraphs.push({

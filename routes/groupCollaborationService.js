@@ -24,6 +24,12 @@ router.post("/", async (req, res, next) => {
   }
 
   try {
+    const existingGroup = await Group.findOne({ groupName: groupName });
+
+    if (existingGroup) {
+      return res.status(400).json({ message: "Group already exists" });
+    }
+
     const newGroup = new Group({
       groupName,
       members: [req.user._id],
