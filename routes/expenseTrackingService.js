@@ -32,14 +32,7 @@ router.get("/user", async (req, res, next) => {
 router.post("", async (req, res, next) => {
   const { amount, date, categoryId, description, groupId, budgetId } = req.body;
 
-  if (
-    !amount ||
-    !date ||
-    !categoryId ||
-    !description ||
-    !groupId ||
-    !budgetId
-  ) {
+  if (!amount || !date || !categoryId || !description || !budgetId) {
     return res.status(400).json({ message: "Missing required fields" });
   }
 
