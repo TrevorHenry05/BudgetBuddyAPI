@@ -159,7 +159,7 @@ router.delete("/:groupId", async (req, res, next) => {
   const { groupId } = req.params;
 
   try {
-    const group = await Group.findByIdAndDelete(groupId);
+    const group = await Group.findById(groupId);
     if (!group) {
       return res.status(404).json({ message: "Group not found" });
     }
@@ -168,6 +168,7 @@ router.delete("/:groupId", async (req, res, next) => {
       return res.status(403).json({ message: "Unauthorized" });
     }
 
+    await Group.findByIdAndDelete(groupId);
     await Budget.deleteMany({ groupId: groupId });
     await Expense.deleteMany({ groupId: groupId });
 
