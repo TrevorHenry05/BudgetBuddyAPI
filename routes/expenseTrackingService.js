@@ -30,9 +30,16 @@ router.get("/user", async (req, res, next) => {
 
 //CREATE NEW EXPENSE DOCUMENT
 router.post("", async (req, res, next) => {
-  const { amount, date, categoryId, description, groupId } = req.body;
+  const { amount, date, categoryId, description, groupId, budgetId } = req.body;
 
-  if (!amount || !date || !categoryId || !description || !groupId) {
+  if (
+    !amount ||
+    !date ||
+    !categoryId ||
+    !description ||
+    !groupId ||
+    !budgetId
+  ) {
     return res.status(400).json({ message: "Missing required fields" });
   }
 
@@ -42,6 +49,7 @@ router.post("", async (req, res, next) => {
       date,
       categoryId: categoryId,
       description,
+      budgetId,
       userId: req.user._id,
       groupId: groupId || null,
     });
