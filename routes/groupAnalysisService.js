@@ -140,10 +140,12 @@ const generateExpensesPerUserChart = (data) => {
   let expensesPerUser = {};
   data.forEach((budget) => {
     budget.expenses.forEach((expense) => {
-      if (!expensesPerUser[expense.user.username]) {
-        expensesPerUser[expense.user.username] = 0;
+      if (expense.user) {
+        if (!expensesPerUser[expense.user.username]) {
+          expensesPerUser[expense.user.username] = 0;
+        }
+        expensesPerUser[expense.user.username] += expense.amount;
       }
-      expensesPerUser[expense.user.username] += expense.amount;
     });
   });
 
