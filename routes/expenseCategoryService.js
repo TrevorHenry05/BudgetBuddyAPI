@@ -6,7 +6,7 @@ const router = express.Router();
 // Get all expense categories
 router.get("/all", async (req, res, next) => {
   try {
-    const expenseCategories = await ExpenseCategory.find({}).toArray();
+    const expenseCategories = await ExpenseCategory.find({});
     res.status(200).json(expenseCategories);
   } catch (error) {
     next(error);
