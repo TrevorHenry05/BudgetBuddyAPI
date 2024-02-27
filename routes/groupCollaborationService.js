@@ -65,6 +65,7 @@ router.get("/:groupId", async (req, res, next) => {
         username: member.username,
         email: member.email,
       })),
+      memberIds: group.members,
     });
   } catch (error) {
     next(error);
