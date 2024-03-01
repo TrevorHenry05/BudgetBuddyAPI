@@ -27,7 +27,9 @@ router.get("/profile", async (req, res, next) => {
 
 router.get("/all", async (req, res, next) => {
   try {
-    const users = await User.find({}).select("-password");
+    const users = await User.find({}).select(
+      "-password -__v -createdAt -updatedAt"
+    );
     res.status(200).json(users);
   } catch (error) {
     next(error);
@@ -69,7 +71,12 @@ router.put("/profile", async (req, res, next) => {
     const updatedUser = user.toObject();
     delete updatedUser.password;
 
-    res.status(200).json(updatedUser);
+    res.status(200).json({
+      _id: updatedUser._id,
+      username: updatedUser.username,
+      email: updatedUser.email,
+      isAdmin: updatedUser.isAdmin,
+    });
   } catch (error) {
     next(error);
   }

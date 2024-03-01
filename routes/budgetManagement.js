@@ -28,9 +28,19 @@ router.post("/", async (req, res, next) => {
 
   try {
     await newBudget.save();
-    res
-      .status(201)
-      .json({ message: "Budget created successfully", data: newBudget });
+    res.status(201).json({
+      message: "Budget created successfully",
+      data: {
+        _id: newBudget._id,
+        totalBudget: newBudget.totalBudget,
+        purpose: newBudget.purpose,
+        startDate: newBudget.startDate,
+        endDate: newBudget.endDate,
+        userId: newBudget.userId,
+        groupId: newBudget.groupId,
+        budgetType: newBudget.budgetType,
+      },
+    });
   } catch (error) {
     next(error);
   }
@@ -39,7 +49,10 @@ router.post("/", async (req, res, next) => {
 // Get budgets by userId
 router.get("/user", async (req, res, next) => {
   try {
-    const budgets = await Budget.find({ userId: req.user._id });
+    const budgets = await Budget.find(
+      { userId: req.user._id },
+      "_id totalBudget purpose startDate endDate userId groupId budgetType"
+    );
     res.status(200).json(budgets);
   } catch (error) {
     next(error);
@@ -50,7 +63,10 @@ router.get("/user", async (req, res, next) => {
 router.get("/group/:groupId", async (req, res, next) => {
   const { groupId } = req.params;
   try {
-    const budgets = await Budget.find({ groupId });
+    const budgets = await Budget.find(
+      { groupId },
+      "_id totalBudget purpose startDate endDate userId groupId budgetType"
+    );
     res.status(200).json(budgets);
   } catch (error) {
     next(error);
@@ -150,7 +166,16 @@ router.put("/:budgetId", async (req, res, next) => {
     }
     res.status(200).json({
       message: "Budget updated successfully",
-      data: updatedBudget,
+      data: {
+        _id: updatedBudget._id,
+        totalBudget: updatedBudget.totalBudget,
+        purpose: updatedBudget.purpose,
+        startDate: updatedBudget.startDate,
+        endDate: updatedBudget.endDate,
+        userId: updatedBudget.userId,
+        groupId: updatedBudget.groupId,
+        budgetType: updatedBudget.budgetType,
+      },
     });
   } catch (error) {
     next(error);
@@ -177,7 +202,10 @@ router.delete("/:budgetId", async (req, res, next) => {
 // Get all budgets
 router.get("/", async (req, res, next) => {
   try {
-    const budgets = await Budget.find({});
+    const budgets = await Budget.find(
+      {},
+      "_id totalBudget purpose startDate endDate userId groupId budgetType"
+    );
     res.status(200).json(budgets);
   } catch (error) {
     next(error);

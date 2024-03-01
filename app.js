@@ -1,6 +1,9 @@
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
+
+const swaggerUi = require("swagger-ui-express");
+const swaggerDocument = require("./swagger.json");
 const requireAuth = require("./middlewares/requireAuth");
 const handleError = require("./middlewares/handleError");
 const userAuthRoutes = require("./routes/userAuth");
@@ -26,6 +29,7 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use("/api/auth", userAuthRoutes);
 

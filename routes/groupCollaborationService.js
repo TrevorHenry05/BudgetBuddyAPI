@@ -9,7 +9,10 @@ const router = express.Router();
 // GET all groups a user is a member of
 router.get("/user", async (req, res, next) => {
   try {
-    const groups = await Group.find({ members: req.user._id });
+    const groups = await Group.find(
+      { members: req.user._id },
+      "_id groupName members"
+    );
     res.status(200).json(groups);
   } catch (error) {
     next(error);
@@ -37,9 +40,14 @@ router.post("/", async (req, res, next) => {
     });
 
     await newGroup.save();
-    res
-      .status(201)
-      .json({ message: "Group created successfully", data: newGroup });
+    res.status(201).json({
+      message: "Group created successfully",
+      data: {
+        _id: newGroup._id,
+        groupName: newGroup.groupName,
+        members: newGroup.members,
+      },
+    });
   } catch (error) {
     next(error);
   }
@@ -94,7 +102,11 @@ router.put("/:groupId", async (req, res, next) => {
     }
     res.status(200).json({
       message: "Group updated successfully",
-      data: updatedGroup,
+      data: {
+        _id: updatedGroup._id,
+        groupName: updatedGroup.groupName,
+        members: updatedGroup.members,
+      },
     });
   } catch (error) {
     next(error);
@@ -121,9 +133,8 @@ router.post("/:groupId/members", async (req, res, next) => {
       return res.status(404).send({ message: "Group not found" });
     }
 
-    res.status(200).json({
+    res.status(200).send({
       message: "Member added successfully",
-      data: updatedGroup,
     });
   } catch (error) {
     next(error);
@@ -145,10 +156,7 @@ router.delete("/:groupId/members/:memberId", async (req, res, next) => {
       return res.status(404).send({ message: "Group not found" });
     }
 
-    res.status(200).json({
-      message: "Member removed successfully",
-      data: updatedGroup,
-    });
+    res.status(200).send({ message: "Member removed successfully" });
   } catch (error) {
     next(error);
   }
@@ -181,7 +189,7 @@ router.delete("/:groupId", async (req, res, next) => {
 // GET all groups (regardless of membership)
 router.get("/", async (req, res, next) => {
   try {
-    const groups = await Group.find({});
+    const groups = await Group.find({}, "_id groupName members");
     res.status(200).json(groups);
   } catch (error) {
     next(error);
