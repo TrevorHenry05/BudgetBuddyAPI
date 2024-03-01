@@ -1,0 +1,2061 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "BudgetBuddy API",
+    "description": "API for analyzing and reporting user and group expenses.",
+    "version": "1.1"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+  ],
+  "tags": [
+    {
+      "name": "User Analysis Service",
+      "description": "Provides visual charts and reports on user expenses by month, category, and budget utilization, along with aggregated data."
+    },
+    {
+      "name": "Group Analysis Service",
+      "description": "Delivers group expense insights through charts on monthly spending, categories, per-user expenses, and budget use, plus aggregated data."
+    },
+    {
+      "name": "User Aggregation Service",
+      "description": "Gathers and organizes user's financial data, including expenses and budgets, for easy management."
+    },
+    {
+      "name": "Group Aggregation Service",
+      "description": "Collects group financial data, including expenses and budgets, to simplify group finance monitoring."
+    },
+    {
+      "name": "Admin User Service",
+      "description": "Offers administrators access to comprehensive data on expenses, budgets, users, and groups for platform oversight."
+    },
+    {
+      "name": "User Authentication Service",
+      "description": "Manages user access with secure registration and login processes, ensuring personalized experiences."
+    },
+    {
+      "name": "Expense Tracking Service",
+      "description": "Enables efficient expense management, allowing for the addition, update, and removal of expenses."
+    },
+    {
+      "name": "Group Collaboration Service",
+      "description": "Facilitates group management tasks including creating, updating, retrieving, and deleting group details."
+    },
+    {
+      "name": "Expense Category Service",
+      "description": "Provides access to a list of predefined expense categories for organized financial tracking."
+    },
+    {
+      "name": "Budget Management Service",
+      "description": "Enables efficient budget management, allowing for the addition, update, and removal of expenses."
+    },
+    {
+      "name": "User management service",
+      "description": "Operations related to user management"
+    }
+  ],
+  "paths": {
+    "/api/admin": {
+      "get": {
+        "tags": ["Admin User Service"],
+        "summary": "Fetch all data",
+        "description": "Aggregates all User, Group, Budget, and Expense data.\n",
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved all data.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AggregatedAdminData"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized request - either no authorization token was provided or the provided token was invalid."
+          },
+          "500": {
+            "description": "Internal server error - an error occurred on the server while processing the request."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/aggregation/group/{groupId}": {
+      "get": {
+        "tags": ["Group Aggregation Service"],
+        "summary": "Aggregate Group Data",
+        "description": "Aggregates group data by grouping user expenses by budget and returns it.",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "description": "Unique Identifier of the Group.",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved aggregated group data.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_200_2"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized request - either no authorization token was provided or the provided token was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_401"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Group not found - the specified groupId does not match any existing group."
+          },
+          "500": {
+            "description": "Internal server error - an error occurred on the server while processing the request."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/aggregation/user": {
+      "get": {
+        "tags": ["User Aggregation Service"],
+        "summary": "Aggregate User Data",
+        "description": "Aggregates user data by grouping user expenses by budget and returns it.",
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved aggregated user data.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_200_2"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized request - either no authorization token was provided or the provided token was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_401"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found - the specified user does not match any existing records."
+          },
+          "500": {
+            "description": "Internal server error - an error occurred on the server while processing the request."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/analysis/group/{groupId}": {
+      "get": {
+        "tags": ["Group Analysis Service"],
+        "summary": "Fetch and Analyze Group Data",
+        "description": "Uses Group Data Aggregation Service to fetch budgets and expenses, calculates statistics, and generates QuickChart visualizations. Requires a valid JWT token for authorization.\n",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "description": "Unique Identifier of the Group.",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved Group expense analysis.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_200_1"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized request - either no authorization token was provided or the provided token was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_401"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Group not found - the specified groupId does not match any existing group."
+          },
+          "500": {
+            "description": "Internal server error - an error occurred on the server while processing the request."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/analysis/user": {
+      "get": {
+        "tags": ["User Analysis Service"],
+        "summary": "Fetch and Analyze User Data",
+        "description": "Uses User Data Aggregation Service to fetch budgets and expenses, calculates statistics, and generates QuickChart visualizations. Requires a valid JWT token for authorization.\n",
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved user expense analysis.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_200"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized request - either no authorization token was provided or the provided token was invalid."
+          },
+          "404": {
+            "description": "User not found - the specified user does not match any existing records."
+          },
+          "500": {
+            "description": "Internal server error - an error occurred on the server while processing the request."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": ["User Authentication Service"],
+        "summary": "Authenticates a user against the database.",
+        "description": "Authenticates a User against the database and returns a JWT Session Token and the isAdmin status.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/auth_login_body"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Authentication successful. Returns JWT token and isAdmin status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_200_3"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials provided.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_401"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "tags": ["User Authentication Service"],
+        "summary": "Register a new user",
+        "description": "This endpoint registers a new user with username, email, and password.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/auth_register_body"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_201"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "User already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_409"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/budgets": {
+      "get": {
+        "tags": ["Budget Management Service"],
+        "summary": "Get all budgets",
+        "responses": {
+          "200": {
+            "description": "A list of all budgets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Budget"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": ["Budget Management Service"],
+        "summary": "Create a new budget",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/api_budgets_body"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Budget created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Budget"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing required fields"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/budgets/group/{groupId}": {
+      "get": {
+        "tags": ["Budget Management Service"],
+        "summary": "Get budgets for a specific group",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of budgets for the specified group",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Budget"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/budgets/user": {
+      "get": {
+        "tags": ["Budget Management Service"],
+        "summary": "Get budgets for the authenticated user",
+        "responses": {
+          "200": {
+            "description": "A list of budgets for the authenticated user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Budget"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/budgets/{budgetId}": {
+      "get": {
+        "tags": ["Budget Management Service"],
+        "summary": "Get a specific budget by ID",
+        "parameters": [
+          {
+            "name": "budgetId",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detailed information about the specified budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BudgetWithDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Budget not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": ["Budget Management Service"],
+        "summary": "Update a specific budget by ID",
+        "parameters": [
+          {
+            "name": "budgetId",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/budgets_budgetId_body"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Budget updated successfully"
+          },
+          "400": {
+            "description": "Missing required fields"
+          },
+          "404": {
+            "description": "Budget not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": ["Budget Management Service"],
+        "summary": "Delete a specific budget by ID",
+        "parameters": [
+          {
+            "name": "budgetId",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Budget deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Budget"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Budget not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/expensecategories/all": {
+      "get": {
+        "tags": ["Expense Category Service"],
+        "summary": "Get all expense categories",
+        "description": "Retrieves a list of all available expense categories.",
+        "responses": {
+          "200": {
+            "description": "A list of expense categories",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExpenseCategory"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/expenses": {
+      "post": {
+        "tags": ["Expense Tracking Service"],
+        "summary": "Create a new expense",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Expense"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Expense created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Expense"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing required fields"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/expenses/group/{groupId}": {
+      "get": {
+        "tags": ["Expense Tracking Service"],
+        "summary": "Get expenses for a specific group",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "description": "Unique identifier of the group",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of expenses for the specified group",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Expense"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Group not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/expenses/user": {
+      "get": {
+        "tags": ["Expense Tracking Service"],
+        "summary": "Get expenses for the authenticated user",
+        "responses": {
+          "200": {
+            "description": "A list of expenses for the authenticated user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Expense"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/expenses/{expenseId}": {
+      "get": {
+        "tags": ["Expense Tracking Service"],
+        "summary": "Get a specific expense by ID",
+        "parameters": [
+          {
+            "name": "expenseId",
+            "in": "path",
+            "description": "Unique identifier of the expense",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detailed information about the specified expense",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExpenseWithDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Expense not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": ["Expense Tracking Service"],
+        "summary": "Update an existing expense",
+        "parameters": [
+          {
+            "name": "expenseId",
+            "in": "path",
+            "description": "Unique identifier of the expense to be updated",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Expense"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Expense updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Expense"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing required fields"
+          },
+          "404": {
+            "description": "Expense not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": ["Expense Tracking Service"],
+        "summary": "Delete a specific expense",
+        "parameters": [
+          {
+            "name": "expenseId",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Expense deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Expense"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Expense not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/groups": {
+      "get": {
+        "tags": ["Group Collaboration Service"],
+        "summary": "Get all groups",
+        "responses": {
+          "200": {
+            "description": "A list of all groups",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Group"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": ["Group Collaboration Service"],
+        "summary": "Create a new group",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/api_groups_body"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Group created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Group"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Group name is required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/groups/user": {
+      "get": {
+        "tags": ["Group Collaboration Service"],
+        "summary": "Get all groups the authenticated user is a member of",
+        "responses": {
+          "200": {
+            "description": "A list of groups",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Group"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/groups/{groupId}": {
+      "get": {
+        "tags": ["Group Collaboration Service"],
+        "summary": "Get a single group by its ID",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detailed information about the specified group",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupWithDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Group not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": ["Group Collaboration Service"],
+        "summary": "Update a group by its ID",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/groups_groupId_body"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Group updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Group"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "groupName and members array are required"
+          },
+          "404": {
+            "description": "Group not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": ["Group Collaboration Service"],
+        "summary": "Delete a group by its ID",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Group deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Group"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Group not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/groups/{groupId}/members": {
+      "post": {
+        "tags": ["Group Collaboration Service"],
+        "summary": "Add a new member to a group",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/groupId_members_body"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Member added successfully"
+          },
+          "400": {
+            "description": "Member ID is required"
+          },
+          "404": {
+            "description": "Group not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/groups/{groupId}/members/{memberId}": {
+      "delete": {
+        "tags": ["Group Collaboration Service"],
+        "summary": "Remove a member from a group",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "memberId",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Member removed successfully"
+          },
+          "404": {
+            "description": "Group not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/users/all": {
+      "get": {
+        "tags": ["User management service"],
+        "summary": "Fetch all users",
+        "responses": {
+          "200": {
+            "description": "Users fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/users/profile": {
+      "get": {
+        "tags": ["User management service"],
+        "summary": "Fetch the authenticated user's profile",
+        "responses": {
+          "200": {
+            "description": "User profile fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": ["User management service"],
+        "summary": "Update the authenticated user's profile",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/users_profile_body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User profile updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Email or username is already in use"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": ["User management service"],
+        "summary": "Delete the authenticated user's account",
+        "responses": {
+          "200": {
+            "description": "User deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AggregatedAdminData": {
+        "type": "object",
+        "properties": {
+          "Budgets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BudgetWithDetails"
+            }
+          },
+          "Expenses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExpenseWithDetails"
+            }
+          },
+          "Groups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GroupWithDetails"
+            }
+          },
+          "Users": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/User"
+            }
+          }
+        }
+      },
+      "AggregatedData": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AggregatedData_inner"
+        }
+      },
+      "AggregatedData_inner": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "format": "objectId",
+            "description": "The unique identifier of the Budget, in MongoDB ObjectId format."
+          },
+          "budgetType": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "expenses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AggregatedData_inner_expenses"
+            }
+          },
+          "groupId": {
+            "type": "string",
+            "format": "objectId",
+            "description": "The unique identifier of the Group, in MongoDB ObjectId format."
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "totalBudget": {
+            "type": "number",
+            "format": "float"
+          },
+          "user": {
+            "$ref": "#/components/schemas/AggregatedData_inner_user"
+          }
+        }
+      },
+      "Budget": {
+        "required": ["budgetType", "purpose", "totalBudget"],
+        "type": "object",
+        "properties": {
+          "budgetType": {
+            "type": "string",
+            "enum": ["personal", "group"]
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "groupId": {
+            "type": "string",
+            "format": "objectId",
+            "description": "The unique identifier of the Group, in MongoDB ObjectId format."
+          },
+          "_id": {
+            "type": "string",
+            "format": "objectId",
+            "description": "The unique identifier of the Budget, in MongoDB ObjectId format."
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "totalBudget": {
+            "type": "number",
+            "format": "float"
+          },
+          "userId": {
+            "type": "string",
+            "format": "objectId",
+            "description": "The unique identifier of the User, in MongoDB ObjectId format."
+          }
+        }
+      },
+      "BudgetWithDetails": {
+        "type": "object",
+        "properties": {
+          "budgetType": {
+            "type": "string",
+            "enum": ["personal", "group"]
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "expenses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExpenseWithDetails"
+            }
+          },
+          "group": {
+            "$ref": "#/components/schemas/ExpenseWithDetails_group"
+          },
+          "_id": {
+            "type": "string",
+            "format": "objectId",
+            "description": "The unique identifier of the Budget, in MongoDB ObjectId format."
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "totalBudget": {
+            "type": "number",
+            "format": "float"
+          },
+          "user": {
+            "$ref": "#/components/schemas/GroupWithDetails_members"
+          }
+        }
+      },
+      "Expense": {
+        "required": ["amount", "budgetId", "date", "userId"],
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number",
+            "format": "float"
+          },
+          "budgetId": {
+            "type": "string",
+            "format": "objectId",
+            "description": "The unique identifier of the Budget, in MongoDB ObjectId format."
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "objectId",
+            "description": "The unique identifier of the ExpenseCategory, in MongoDB ObjectId format."
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "description": {
+            "type": "string"
+          },
+          "groupId": {
+            "type": "string",
+            "format": "objectId",
+            "description": "The unique identifier of the Group, in MongoDB ObjectId format."
+          },
+          "_id": {
+            "type": "string",
+            "format": "objectId",
+            "description": "The unique identifier of the Expense, in MongoDB ObjectId format."
+          },
+          "userId": {
+            "type": "string",
+            "format": "objectId",
+            "description": "The unique identifier of the User, in MongoDB ObjectId format."
+          }
+        }
+      },
+      "ExpenseCategory": {
+        "required": ["categoryName"],
+        "type": "object",
+        "properties": {
+          "categoryName": {
+            "type": "string"
+          },
+          "_id": {
+            "type": "string",
+            "format": "objectId",
+            "description": "The unique identifier of the ExpenseCategory, in MongoDB ObjectId format."
+          }
+        }
+      },
+      "ExpenseWithDetails": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number",
+            "format": "float"
+          },
+          "budgetId": {
+            "type": "string",
+            "format": "objectId",
+            "description": "The unique identifier of the Budget, in MongoDB ObjectId format."
+          },
+          "category": {
+            "$ref": "#/components/schemas/ExpenseWithDetails_category"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "description": {
+            "type": "string"
+          },
+          "group": {
+            "$ref": "#/components/schemas/ExpenseWithDetails_group"
+          },
+          "_id": {
+            "type": "string",
+            "format": "objectId",
+            "description": "The unique identifier of the Expense, in MongoDB ObjectId format."
+          },
+          "user": {
+            "$ref": "#/components/schemas/GroupWithDetails_members"
+          }
+        }
+      },
+      "ExpenseWithDetails_category": {
+        "type": "object",
+        "properties": {
+          "categoryName": {
+            "type": "string"
+          }
+        }
+      },
+      "ExpenseWithDetails_group": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "format": "objectId",
+            "description": "The unique identifier of the Group, in MongoDB ObjectId format."
+          },
+          "groupName": {
+            "type": "string"
+          }
+        }
+      },
+      "ExpensesPerCategory": {
+        "type": "object",
+        "properties": {
+          "chartUrl": {
+            "type": "string"
+          },
+          "expensesPerCategory": {
+            "$ref": "#/components/schemas/ExpenseWithDetails_category"
+          }
+        }
+      },
+      "ExpensesPerMonth": {
+        "type": "object",
+        "properties": {
+          "chartUrl": {
+            "type": "string"
+          },
+          "expensesPerMonth": {
+            "$ref": "#/components/schemas/ExpensesPerMonth_expensesPerMonth"
+          }
+        }
+      },
+      "ExpensesPerMonth_expensesPerMonth": {
+        "type": "object",
+        "properties": {
+          "monthOfTheYear": {
+            "type": "number",
+            "format": "integer"
+          }
+        }
+      },
+      "ExpensesPerUser": {
+        "type": "object",
+        "properties": {
+          "charUrl": {
+            "type": "string"
+          },
+          "expensesPerUser": {
+            "$ref": "#/components/schemas/ExpensesPerUser_expensesPerUser"
+          }
+        }
+      },
+      "ExpensesPerUser_expensesPerUser": {
+        "type": "object",
+        "properties": {
+          "usernameOfUser": {
+            "type": "number",
+            "format": "integer"
+          }
+        }
+      },
+      "Group": {
+        "required": ["groupName"],
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "format": "objectId",
+            "description": "The unique identifier of the Group, in MongoDB ObjectId format."
+          },
+          "groupName": {
+            "type": "string"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "objectId",
+              "description": "The unique identifier of the User, in MongoDB ObjectId format."
+            }
+          }
+        }
+      },
+      "GroupWithDetails": {
+        "required": ["groupName"],
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "format": "objectId",
+            "description": "The unique identifier of the Group, in MongoDB ObjectId format."
+          },
+          "groupName": {
+            "type": "string"
+          },
+          "memberIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "objectId",
+              "description": "The unique identifier of the User, in MongoDB ObjectId format."
+            }
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GroupWithDetails_members"
+            }
+          }
+        }
+      },
+      "GroupWithDetails_members": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "format": "objectId",
+            "description": "The unique identifier of the User, in MongoDB ObjectId format."
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "username": {
+            "type": "string"
+          }
+        }
+      },
+      "PercentOfBudgetUsed": {
+        "type": "object",
+        "properties": {
+          "budgetId": {
+            "type": "string",
+            "format": "objectId",
+            "description": "The unique identifier of the Budget, in MongoDB ObjectId format."
+          },
+          "chartUrl": {
+            "type": "string"
+          },
+          "percentRemaining": {
+            "type": "number",
+            "format": "float"
+          },
+          "percentUsed": {
+            "type": "number",
+            "format": "float"
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "totalBudget": {
+            "type": "integer"
+          },
+          "totalExpenses": {
+            "type": "integer"
+          }
+        }
+      },
+      "User": {
+        "required": ["email", "isAdmin", "password", "username"],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "id": {
+            "type": "string",
+            "format": "objectId",
+            "description": "The unique identifier of the User, in MongoDB ObjectId format."
+          },
+          "isAdmin": {
+            "type": "boolean"
+          },
+          "password": {
+            "type": "string",
+            "description": "The user's password. This is encrypted in the database and not exposed in API responses.",
+            "format": "password"
+          },
+          "username": {
+            "type": "string"
+          }
+        }
+      },
+      "api_budgets_body": {
+        "required": [
+          "budgetType",
+          "endDate",
+          "purpose",
+          "startDate",
+          "totalBudget"
+        ],
+        "type": "object",
+        "properties": {
+          "budgetType": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "groupId": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "totalBudget": {
+            "type": "number"
+          }
+        }
+      },
+      "api_groups_body": {
+        "required": ["groupName"],
+        "properties": {
+          "groupName": {
+            "type": "string"
+          }
+        }
+      },
+      "auth_login_body": {
+        "required": ["email", "password"],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "User's email.",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "description": "User's password."
+          }
+        }
+      },
+      "auth_register_body": {
+        "required": ["email", "password", "username"],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "john.doe@example.com"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "example": "SecurePassword123"
+          },
+          "username": {
+            "type": "string",
+            "example": "john_doe"
+          }
+        }
+      },
+      "budgets_budgetId_body": {
+        "required": ["endDate", "purpose", "startDate", "totalBudget"],
+        "type": "object",
+        "properties": {
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "totalBudget": {
+            "type": "number"
+          }
+        }
+      },
+      "groupId_members_body": {
+        "required": ["memberId"],
+        "properties": {
+          "memberId": {
+            "type": "string"
+          }
+        }
+      },
+      "groups_groupId_body": {
+        "required": ["groupName", "members"],
+        "properties": {
+          "groupName": {
+            "type": "string"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "inline_response_200": {
+        "type": "object",
+        "properties": {
+          "aggregatedUserData": {
+            "$ref": "#/components/schemas/AggregatedData"
+          },
+          "expensesPerCategory": {
+            "$ref": "#/components/schemas/ExpensesPerCategory"
+          },
+          "expensesPerMonth": {
+            "$ref": "#/components/schemas/ExpensesPerMonth"
+          },
+          "percentOfBudgetsUsed": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PercentOfBudgetUsed"
+            }
+          }
+        }
+      },
+      "inline_response_200_1": {
+        "type": "object",
+        "properties": {
+          "aggregatedUserData": {
+            "$ref": "#/components/schemas/AggregatedData"
+          },
+          "expensesPerCategory": {
+            "$ref": "#/components/schemas/ExpensesPerCategory"
+          },
+          "expensesPerMonth": {
+            "$ref": "#/components/schemas/ExpensesPerMonth"
+          },
+          "expensesPerUser": {
+            "$ref": "#/components/schemas/ExpensesPerUser"
+          },
+          "percentOfBudgetsUsed": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PercentOfBudgetUsed"
+            }
+          }
+        }
+      },
+      "inline_response_200_2": {
+        "type": "object",
+        "properties": {
+          "aggregatedData": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AggregatedData"
+            }
+          }
+        }
+      },
+      "inline_response_200_3": {
+        "type": "object",
+        "properties": {
+          "isAdmin": {
+            "type": "boolean",
+            "description": "Indicates if the user has admin privileges."
+          },
+          "token": {
+            "type": "string",
+            "description": "JWT token for authentication."
+          }
+        }
+      },
+      "inline_response_201": {
+        "type": "object",
+        "properties": {
+          "isAdmin": {
+            "type": "boolean",
+            "description": "Indicates if the user has admin privileges"
+          },
+          "token": {
+            "type": "string",
+            "description": "JWT token for authentication"
+          }
+        }
+      },
+      "inline_response_401": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "A message indicating the credentials are invalid."
+          }
+        }
+      },
+      "inline_response_409": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "User already exists"
+          }
+        }
+      },
+      "users_profile_body": {
+        "required": ["email", "username"],
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "AggregatedData_inner_user": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "format": "objectId",
+            "description": "The unique identifier of the User, in MongoDB ObjectId format."
+          },
+          "username": {
+            "type": "string"
+          }
+        }
+      },
+      "AggregatedData_inner_expenses": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "format": "objectId",
+            "description": "The unique identifier of the Expense, in MongoDB ObjectId format."
+          },
+          "amount": {
+            "type": "number",
+            "format": "float"
+          },
+          "budgetId": {
+            "type": "string",
+            "format": "objectId",
+            "description": "The unique identifier of the Budget, in MongoDB ObjectId format."
+          },
+          "categoryName": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "description": {
+            "type": "string"
+          },
+          "groupId": {
+            "type": "string",
+            "format": "objectId",
+            "description": "The unique identifier of the Group, in MongoDB ObjectId format."
+          },
+          "user": {
+            "$ref": "#/components/schemas/AggregatedData_inner_user"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

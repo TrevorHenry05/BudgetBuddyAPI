@@ -50,7 +50,15 @@ router.post("", async (req, res, next) => {
     await newExpense.save();
     res.status(201).json({
       message: "Expense created successfully",
-      data: newExpense,
+      data: {
+        _id: newExpense._id,
+        amount: newExpense.amount,
+        date: newExpense.date,
+        description: newExpense.description,
+        budgetId: newExpense.budgetId,
+        groupId: newExpense.groupId,
+        categoryId: newExpense.categoryId,
+      },
     });
   } catch (error) {
     next(error);
@@ -116,7 +124,15 @@ router.put("/:expenseId", async (req, res, next) => {
 
     res.status(200).json({
       message: "Expense updated successfully",
-      data: updatedExpense,
+      data: {
+        _id: updatedExpense._id,
+        amount: updatedExpense.amount,
+        date: updatedExpense.date,
+        description: updatedExpense.description,
+        budgetId: updatedExpense.budgetId,
+        groupId: updatedExpense.groupId,
+        categoryId: updatedExpense.categoryId,
+      },
     });
   } catch (error) {
     next(error);
