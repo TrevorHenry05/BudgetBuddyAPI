@@ -81,7 +81,7 @@ router.get("/:expenseId", async (req, res, next) => {
       description: expense.description,
       budgetId: expense.budgetId,
       group: group ? { _id: group._id, groupName: group.groupName } : null,
-      category: category ? { categoryName: category.categoryName } : null,
+      category: category ? { _id: category._id, categoryName: category.categoryName } : null,
       user: user
         ? { _id: user._id, username: user.username, email: user.email }
         : null,
